@@ -9,8 +9,8 @@ import torch.nn as nn
 from torch.autograd import Variable
 import torch.nn.functional as F
 
-current_comp_vector=8
-team_vector=1024
+current_comp_vector = 8
+team_vector = 1024
 
 
 class DNN(nn.Module):

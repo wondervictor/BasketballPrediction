@@ -70,8 +70,6 @@ def test_load_competitions():
     data = load_competitions()
     print(data[1:10])
 
-
-
 if __name__ == '__main__':
 
     test_load_competitions()
