@@ -9,7 +9,7 @@ __all__ = ['MatchData']
 def load_competitions():
     """
     Load Comepetions
-    Competition: [(Away:int, Home:int, Away_Ago:[int], Home_Ago:[int], rate:[int])]
+    Competition: [(Away, Home, Away_Ago_Win, Away_Ago_Lose, Home_Ago_Win, Home_Ago_Lose, Away_Score, Home_Score)]
     """
 
     data = []
@@ -33,7 +33,9 @@ def load_competitions():
 
         score = map(int, elements[4].split(':'))
 
-        data.append([away, home, away_ago, home_ago, score])
+        parts = [away, home] + away_ago + home_ago + score
+
+        data.append(parts)
 
     return data
 
@@ -64,15 +66,42 @@ class MatchData(object):
     def get_test_data(self):
         return self.testing_data
 
+    def dump_matches_to_file(self, file_dir):
+
+        csv_line = 'away,home,away_ago_win,away_ago_lose,home_ago_win,home_ago_lose,score_away,score_home\n'
+        with open(file_dir+'train.csv', 'w+') as f:
+            f.write(csv_line)
+            for match in self.training_data:
+                line = ','.join(['%s' % x for x in match])
+                line += '\n'
+                f.write(line)
+
+        with open(file_dir+'test.csv', 'w+') as f:
+            f.write(csv_line)
+            for match in self.testing_data:
+                line = ','.join(['%s' % x for x in match])
+                line += '\n'
+                f.write(line)
+
+
 
 def test_load_competitions():
 
     data = load_competitions()
     print(data[1:10])
 
+
+def test_match_data():
+
+    s = MatchData(1000)
+    s.roll_data()
+    s.dump_matches_to_file('data/')
+
+
+
 if __name__ == '__main__':
 
-    test_load_competitions()
+    test_match_data()
 
 
 
