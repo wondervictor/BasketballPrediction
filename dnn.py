@@ -14,16 +14,16 @@ import os
 import numpy as np
 import torch.optim as optimizer
 
-current_comp_vector = 2
-team_vector = 21
+CURRENT_COMP_VECTOR_SIZE = 2
+TEAM_VECTOR_SIZE = 21
 
 
 class DNN(nn.Module):
 
     def __init__(self):
         super(DNN, self).__init__()
-        self.input_team_home_layer = nn.Linear(current_comp_vector+team_vector, 128)
-        self.input_team_away_layer = nn.Linear(current_comp_vector+team_vector, 128)
+        self.input_team_home_layer = nn.Linear(CURRENT_COMP_VECTOR_SIZE+TEAM_VECTOR_SIZE, 128)
+        self.input_team_away_layer = nn.Linear(CURRENT_COMP_VECTOR_SIZE+TEAM_VECTOR_SIZE, 128)
         self.home_team_layer = nn.Linear(128, 256)
         self.away_team_layer = nn.Linear(128, 256)
         self.comp_layer_1 = nn.Linear(512, 512)
@@ -107,6 +107,68 @@ def predict(model_name, home_vector, away_vector, home_state, away_state):
     return prob
 
 
+def train_dnn_batch(epoches, batch_size, team_data):
+    """
+    train dnn here
+    :return: 
+    :rtype: 
+    """
+    dnn = DNN()
+    data_provider = MatchData(1000)
+    dnn_optimizer = optimizer.Adamax(dnn.parameters(), lr=0.001)
+    prob_criterion = torch.nn.CrossEntropyLoss()
+    score_criterion = torch.nn.MSELoss()
+
+    print("Starting to train with DNN")
+    for epoch in range(epoches):
+        data_provider.roll_data()
+        train_data = data_provider.get_train_data()
+
+        for i in range(0, len(train_data), batch_size):
+            batch_home_current_state = Variable(torch.zeros((batch_size, CURRENT_COMP_VECTOR_SIZE)))
+            batch_away_current_state = Variable(torch.zeros((batch_size, CURRENT_COMP_VECTOR_SIZE)))
+
+            batch_home_vector = Variable(torch.zeros((batch_size, TEAM_VECTOR_SIZE)))
+            batch_away_vector = Variable(torch.zeros((batch_size, TEAM_VECTOR_SIZE)))
+
+            batch_score = Variable(torch.zeros((batch_size,2)))
+            batch_result = Variable(torch.zeros(batch_size))
+
+            for p in range(batch_size):
+                away_id = train_data[i+p][0]
+                home_id = train_data[i+p][1]
+
+                away_current_state = train_data[i+p][2:4]
+                home_current_state = train_data[i+p][4:6]
+                score = [train_data[i+p][7], train_data[i+p][6]]
+                away_vector = team_data[away_id]
+                home_vector = team_data[home_id]
+                result = [train_data[i+p][8]]
+
+                batch_home_current_state[p] = Variable(torch.FloatTensor(home_current_state))
+                batch_away_current_state[p] = Variable(torch.FloatTensor(away_current_state))
+                batch_away_vector[p] = Variable(torch.FloatTensor(away_vector))
+                batch_home_vector[p] = Variable(torch.FloatTensor(home_vector))
+                batch_score[p] = Variable(torch.FloatTensor(score))
+                batch_result[p] = result
+
+            output_prob, output_score = dnn.forward(
+                home_current_comp_vector=batch_home_current_state,
+                home_team_vector=batch_home_vector,
+                away_current_comp_vector=batch_away_current_state,
+                away_team_vector=batch_away_vector,
+            )
+            loss = prob_criterion(output_prob, result)
+            #loss += 0.001*score_criterion(output_score, batch_score)
+
+            dnn_optimizer.zero_grad()
+            loss.backward()
+            dnn_optimizer.step()
+            if i % 10 == 0:
+                print("Batch: %s Loss: %s" % (i+1, loss.data[0]))
+        save_model(dnn, 'epoch_%d_params.pkl' % epoch)
+
+
 def train_dnn(epoches, team_data):
     """
     train dnn here
@@ -126,14 +188,17 @@ def train_dnn(epoches, team_data):
         train_data = data_provider.get_train_data()
 
         for i in range(len(train_data)):
-            score = train_data[i][-2:]
-            score = [score[-1], score[-2]]
+            #     Competition: [(Away, Home, Away_Ago_Win, Away_Ago_Lose, Home_Ago_Win, Home_Ago_Lose, Away_Score, Home_Score, Home_Win)]
             away_id = train_data[i][0]
             home_id = train_data[i][1]
+
             away_current_state = train_data[i][2:4]
             home_current_state = train_data[i][4:6]
+            score = [train_data[i][7], train_data[i][6]]
             away_vector = team_data[away_id]
             home_vector = team_data[home_id]
+            result = [train_data[i][8]]
+
 
             # TODO: MiniBatch
 
@@ -142,11 +207,7 @@ def train_dnn(epoches, team_data):
 
             away_vector = Variable(torch.FloatTensor(away_vector))
             home_vector = Variable(torch.FloatTensor(home_vector))
-
-            if score[0] > score[1]:
-                prob = Variable(torch.LongTensor([1]))
-            else:
-                prob = Variable(torch.LongTensor([0]))
+            prob = Variable(torch.LongTensor(result))
 
             score = Variable(torch.FloatTensor(score))
 
@@ -181,33 +242,30 @@ def test(team_data):
     wrong = 0
 
     for i in range(len(testing_data)):
-        score = testing_data[i][-2:]
-        score = [score[-1], score[-2]]
+
         away_id = testing_data[i][0]
         home_id = testing_data[i][1]
+
         away_current_state = testing_data[i][2:4]
         home_current_state = testing_data[i][4:6]
+        score = [testing_data[i][7], testing_data[i][6]]
         away_vector = team_data[away_id]
         home_vector = team_data[home_id]
+        result = [testing_data[i][8]]
 
         prob = predict(
-            'epoch_0_params.pkl',
+            'epoch_3_params.pkl',
             home_state=home_current_state,
             home_vector=home_vector,
             away_state=away_current_state,
             away_vector=away_vector
         )
 
-        if score[0] > score[1]:
-            win = 0
-        else:
-            win = 1
-
         pred_win = np.argmax(prob.data.numpy())
 
-        if pred_win == win:
+        if pred_win == result:
             correct += 1
-            line = 'Test: %s Correct! Confidence=%s' % (i, prob.data[win])
+            line = 'Test: %s Correct! Confidence=%s' % (i, prob.data[pred_win])
         else:
             wrong += 1
             line = 'Test: %s Wrong! Confidence=%s' % (i, prob.data.numpy().tolist())

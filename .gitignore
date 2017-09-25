@@ -2,3 +2,5 @@
 *.pyc
 # PyCharm
 .idea
+# ML
+model

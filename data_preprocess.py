@@ -17,7 +17,6 @@ def load_team_data():
     with open('data/teamData.csv', 'r') as open_file:
         lines = open_file.readlines()
     lines = lines[1:]
-    # 6 9 12
 
     def get_num(_str):
         if len(_str) == 0:
@@ -34,7 +33,7 @@ def load_team_data():
 def load_competitions():
     """
     Load Comepetions
-    Competition: [(Away, Home, Away_Ago_Win, Away_Ago_Lose, Home_Ago_Win, Home_Ago_Lose, Away_Score, Home_Score)]
+    Competition: [(Away, Home, Away_Ago_Win, Away_Ago_Lose, Home_Ago_Win, Home_Ago_Lose, Away_Score, Home_Score, Home_Win)]
     """
 
     data = []
@@ -45,6 +44,7 @@ def load_competitions():
         rec_str = rec_str.replace('胜', ',')
         rec_str = rec_str.replace('负', ',')
         records = map(int, rec_str.split(',')[:-1])
+        records = [records[0], records[-1]]
 
         return records
 
@@ -58,7 +58,13 @@ def load_competitions():
 
         score = map(int, elements[4].split(':'))
 
-        parts = [away, home] + away_ago + home_ago + score
+        if score[0] > score[1]:
+            result = [0]
+        else:
+            result = [1]
+
+
+        parts = [away, home] + away_ago + home_ago + score + result
 
         data.append(parts)
 
