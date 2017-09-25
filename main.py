@@ -3,7 +3,7 @@
 """
 Main
 """
-
+import argparse
 from dnn import train_dnn
 import data_preprocess as dp
 from dnn import test
@@ -39,10 +39,10 @@ def team_representations(type):
     return team_data
 
 
-def train_with_dnn():
+def train_with_dnn(opt):
 
     team_data = team_representations('average')
-    train_dnn(10, team_data)
+    train_dnn(10, team_data, opt)
 
 
 def test_with_dnn():
@@ -50,4 +50,10 @@ def test_with_dnn():
     test(team_data)
 
 if __name__ == '__main__':
-    train_with_dnn()
+    parser = argparse.ArgumentParser(description='basketball game prediction')
+    parser.add_argument('--batch-size', type=int, default=64, metavar='N',
+                    help='input batch size for training (default: 64)')
+    parser.add_argument('--cuda', action='store_true', default=False,
+                    help='CUDA training')
+    args = parser.parse_args()
+    train_with_dnn(args)

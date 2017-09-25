@@ -114,6 +114,8 @@ def train_dnn_batch(epoches, batch_size, team_data):
     :rtype: 
     """
     dnn = DNN()
+    if opt.cuda:
+        dnn.cuda()
     data_provider = MatchData(1000)
     dnn_optimizer = optimizer.Adamax(dnn.parameters(), lr=0.001)
     prob_criterion = torch.nn.CrossEntropyLoss()
@@ -169,7 +171,7 @@ def train_dnn_batch(epoches, batch_size, team_data):
         save_model(dnn, 'epoch_%d_params.pkl' % epoch)
 
 
-def train_dnn(epoches, team_data):
+def train_dnn(epoches, team_data, opt):
     """
     train dnn here
     :return: 
@@ -177,6 +179,8 @@ def train_dnn(epoches, team_data):
     """
 
     dnn = DNN()
+    if opt.cuda:
+        dnn.cuda()
     data_provider = MatchData(1000)
     dnn_optimizer = optimizer.Adamax(dnn.parameters(), lr=0.001)
     prob_criterion = torch.nn.CrossEntropyLoss()
@@ -201,15 +205,23 @@ def train_dnn(epoches, team_data):
 
 
             # TODO: MiniBatch
+            if opt.cuda:
+                home_current_state = Variable(torch.FloatTensor(home_current_state).cuda())
+                away_current_state = Variable(torch.FloatTensor(away_current_state).cuda())
 
-            home_current_state = Variable(torch.FloatTensor(home_current_state))
-            away_current_state = Variable(torch.FloatTensor(away_current_state))
+                away_vector = Variable(torch.FloatTensor(away_vector).cuda())
+                home_vector = Variable(torch.FloatTensor(home_vector).cuda())
+                prob = Variable(torch.LongTensor(result).cuda())
+                score = Variable(torch.FloatTensor(score).cuda())
+            else:    
+                home_current_state = Variable(torch.FloatTensor(home_current_state))
+                away_current_state = Variable(torch.FloatTensor(away_current_state))
 
-            away_vector = Variable(torch.FloatTensor(away_vector))
-            home_vector = Variable(torch.FloatTensor(home_vector))
-            prob = Variable(torch.LongTensor(result))
+                away_vector = Variable(torch.FloatTensor(away_vector))
+                home_vector = Variable(torch.FloatTensor(home_vector))
+                prob = Variable(torch.LongTensor(result))
 
-            score = Variable(torch.FloatTensor(score))
+                score = Variable(torch.FloatTensor(score))
 
             output_prob, output_score = dnn.forward(
                 home_current_comp_vector=home_current_state,
