@@ -13,20 +13,20 @@ from team import Team
 import torch.optim as optimizer
 
 current_comp_vector = 2
-team_vector = 512
+team_vector = 21
 
 
 class DNN(nn.Module):
 
     def __init__(self):
         super(DNN, self).__init__()
-        self.input_team_home_layer = nn.Linear(current_comp_vector+team_vector, 1024)
-        self.input_team_away_layer = nn.Linear(current_comp_vector+team_vector, 1024)
-        self.home_team_layer = nn.Linear(1024, 512)
-        self.away_team_layer = nn.Linear(1024, 512)
-        self.comp_layer_1 = nn.Linear(1024, 1024)
-        self.comp_layer_2 = nn.Linear(1024, 512)
-        self.comp_layer_3 = nn.Linear(512, 256)
+        self.input_team_home_layer = nn.Linear(current_comp_vector+team_vector, 256)
+        self.input_team_away_layer = nn.Linear(current_comp_vector+team_vector, 256)
+        self.home_team_layer = nn.Linear(256, 512)
+        self.away_team_layer = nn.Linear(256, 512)
+        self.comp_layer_1 = nn.Linear(1024, 512)
+        self.comp_layer_2 = nn.Linear(512, 256)
+        self.comp_layer_3 = nn.Linear(256, 256)
         self.out_prob = nn.Linear(256, 2)
         self.out_score = nn.Linear(256, 2)
 
@@ -45,12 +45,12 @@ class DNN(nn.Module):
         :rtype: 
         """
         home_representation = F.leaky_relu(
-            torch.cat([home_team_vector, home_current_comp_vector]),
+            self.input_team_home_layer(torch.cat([home_team_vector, home_current_comp_vector])),
             negative_slope=-0.1
         )
 
         away_representation = F.leaky_relu(
-            torch.cat([away_team_vector, away_current_comp_vector]),
+            self.input_team_away_layer(torch.cat([away_team_vector, away_current_comp_vector])),
             negative_slope=-0.1
         )
 
@@ -62,7 +62,7 @@ class DNN(nn.Module):
             self.away_team_layer(away_representation)
         )
 
-        competition_round = F.relu(self.comp_layer_1(home_ready, away_ready))
+        competition_round = F.relu(self.comp_layer_1(torch.cat([home_ready, away_ready])))
         competition_round = F.leaky_relu(self.comp_layer_2(competition_round), negative_slope=-0.5)
         competition_round = F.leaky_relu(self.comp_layer_3(competition_round), negative_slope=-0.5)
 
@@ -72,7 +72,7 @@ class DNN(nn.Module):
         return output_prob, output_score
 
 
-def train_dnn(epoches):
+def train_dnn(epoches, team_data):
     """
     train dnn here
     :return: 
@@ -81,11 +81,11 @@ def train_dnn(epoches):
 
     dnn = DNN()
     data_provider = MatchData(1000)
-    team = Team()
     dnn_optimizer = optimizer.Adam(dnn.parameters(), lr=0.001)
     prob_criterion = torch.nn.CrossEntropyLoss()
     score_criterion = torch.nn.MSELoss()
 
+    print("Starting to train with DNN")
     for i in range(epoches):
         data_provider.roll_data()
         train_data = data_provider.get_train_data()
@@ -96,12 +96,24 @@ def train_dnn(epoches):
             away_id = train_data[i][0]
             home_id = train_data[i][1]
             away_current_state = train_data[i][2:4]
-            home_current_state = train_data[i][4:7]
-            away_vector = team.get_team(away_id)
-            home_vector = team.get_team(home_id)
+            home_current_state = train_data[i][4:6]
+            away_vector = team_data[away_id]
+            home_vector = team_data[home_id]
 
             # TODO: MiniBatch
-            # TODO: Variable
+
+            home_current_state = Variable(torch.FloatTensor(home_current_state))
+            away_current_state = Variable(torch.FloatTensor(away_current_state))
+
+            away_vector = Variable(torch.FloatTensor(away_vector))
+            home_vector = Variable(torch.FloatTensor(home_vector))
+
+            if score[0] > score[1]:
+                prob = Variable(torch.LongTensor([1]))
+            else:
+                prob = Variable(torch.LongTensor([0]))
+
+            score = Variable(torch.FloatTensor(score))
 
             output_prob, output_score = dnn.forward(
                 home_current_comp_vector=home_current_state,
@@ -109,16 +121,15 @@ def train_dnn(epoches):
                 away_current_comp_vector=away_current_state,
                 away_team_vector=away_vector,
             )
-            prob = 1 if score[1] > score[0] else 0
-
+            output_prob = output_prob.unsqueeze(0)
             loss = prob_criterion(output_prob, prob)
-            loss += score_criterion(output_score, score)
+            #loss += 0.001*score_criterion(output_score, score)
 
             dnn_optimizer.zero_grad()
             loss.backward()
             dnn_optimizer.step()
-
-            print("Sample: %s Loss: %s" % (i+1, loss.data[0]))
+            if i % 10 == 0:
+                print("Sample: %s Loss: %s" % (i+1, loss.data[0]))
 
 
 

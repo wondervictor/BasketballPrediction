@@ -70,8 +70,8 @@ class TeamData(object):
     def __init__(self):
         self._team = dict()
 
-    def get_team(self, id):
-        return self._team[id]
+    def get_team(self):
+        return self._team
 
     def process(self):
 
@@ -80,10 +80,11 @@ class TeamData(object):
         current_team = 0
         for member in team_data:
             if member[0] != current_team:
-                self._team[current_team] = current_arr
+                self._team[current_team] = np.array(current_arr)
                 current_arr = []
                 current_team += 1
-            current_arr.extend(member[2:])
+            current_arr.append(np.array(member[2:]))
+        self._team[current_team] = np.array(current_arr)
 
     def test(self):
 
