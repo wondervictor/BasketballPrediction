@@ -6,6 +6,7 @@ Main
 
 from dnn import train_dnn
 import data_preprocess as dp
+from dnn import test
 from sklearn.decomposition import pca
 import numpy as np
 
@@ -43,6 +44,10 @@ def train_with_dnn():
     team_data = team_representations('average')
     train_dnn(10, team_data)
 
+
+def test_with_dnn():
+    team_data = team_representations('average')
+    test(team_data)
 
 if __name__ == '__main__':
     train_with_dnn()

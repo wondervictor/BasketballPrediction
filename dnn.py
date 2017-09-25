@@ -11,6 +11,7 @@ import torch.nn.functional as F
 from data_preprocess import MatchData
 from team import Team
 import os
+import numpy as np
 import torch.optim as optimizer
 
 current_comp_vector = 2
@@ -164,8 +165,59 @@ def train_dnn(epoches, team_data):
             dnn_optimizer.step()
             if i % 10 == 0:
                 print("Sample: %s Loss: %s" % (i+1, loss.data[0]))
-                
+
         save_model(dnn, 'epoch_%d_params.pkl' % epoch)
+
+
+def test(team_data):
+    data_provider = MatchData(1000)
+    data_provider.roll_data()
+
+    testing_data = data_provider.get_test_data()
+
+    log_file = open('testing.log', 'w+')
+
+    correct = 0
+    wrong = 0
+
+    for i in range(len(testing_data)):
+        score = testing_data[i][-2:]
+        score = [score[-1], score[-2]]
+        away_id = testing_data[i][0]
+        home_id = testing_data[i][1]
+        away_current_state = testing_data[i][2:4]
+        home_current_state = testing_data[i][4:6]
+        away_vector = team_data[away_id]
+        home_vector = team_data[home_id]
+
+        prob = predict(
+            'epoch_0_params.pkl',
+            home_state=home_current_state,
+            home_vector=home_vector,
+            away_state=away_current_state,
+            away_vector=away_vector
+        )
+
+        if score[0] > score[1]:
+            win = 0
+        else:
+            win = 1
+
+        pred_win = np.argmax(prob.data.numpy())
+
+        if pred_win == win:
+            correct += 1
+            line = 'Test: %s Correct! Confidence=%s' % (i, prob.data[win])
+        else:
+            wrong += 1
+            line = 'Test: %s Wrong! Confidence=%s' % (i, prob.data.numpy().tolist())
+
+        print(line)
+        log_file.write(line+'\n')
+    log_file.close()
+
+    print("Wrong: %s Correct: %s" % (wrong, correct))
+
 
 
 
