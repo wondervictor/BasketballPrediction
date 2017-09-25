@@ -88,14 +88,21 @@ def load_model(name):
     return torch.load(path+name)
 
 
-def predict(model_name, home_vector, away_vector, home_state, away_state):
+def predict(model_name, home_vector, away_vector, home_state, away_state, opt):
 
     net = load_model(model_name)
-    home_current_state = Variable(torch.FloatTensor(home_state))
-    away_current_state = Variable(torch.FloatTensor(away_state))
+    if opt.cuda ==1:
+        home_current_state = Variable(torch.FloatTensor(home_state).cuda())
+        away_current_state = Variable(torch.FloatTensor(away_state).cuda())
 
-    away_vector = Variable(torch.FloatTensor(away_vector))
-    home_vector = Variable(torch.FloatTensor(home_vector))
+        away_vector = Variable(torch.FloatTensor(away_vector).cuda())
+        home_vector = Variable(torch.FloatTensor(home_vector).cuda())
+    else:
+        home_current_state = Variable(torch.FloatTensor(home_state))
+        away_current_state = Variable(torch.FloatTensor(away_state))
+
+        away_vector = Variable(torch.FloatTensor(away_vector))
+        home_vector = Variable(torch.FloatTensor(home_vector))
 
     prob, _ = net(
         home_current_comp_vector=home_current_state,
@@ -114,7 +121,7 @@ def train_dnn_batch(epoches, batch_size, team_data):
     :rtype: 
     """
     dnn = DNN()
-    if opt.cuda:
+    if opt.cuda == 1:
         dnn.cuda()
     data_provider = MatchData(1000)
     dnn_optimizer = optimizer.Adamax(dnn.parameters(), lr=0.001)
@@ -179,7 +186,7 @@ def train_dnn(epoches, team_data, opt):
     """
 
     dnn = DNN()
-    if opt.cuda:
+    if opt.cuda == 1:
         dnn.cuda()
     data_provider = MatchData(1000)
     dnn_optimizer = optimizer.Adamax(dnn.parameters(), lr=0.001)
@@ -205,7 +212,7 @@ def train_dnn(epoches, team_data, opt):
 
 
             # TODO: MiniBatch
-            if opt.cuda:
+            if opt.cuda == 1:
                 home_current_state = Variable(torch.FloatTensor(home_current_state).cuda())
                 away_current_state = Variable(torch.FloatTensor(away_current_state).cuda())
 
@@ -242,7 +249,7 @@ def train_dnn(epoches, team_data, opt):
         save_model(dnn, 'epoch_%d_params.pkl' % epoch)
 
 
-def test(team_data):
+def test(team_data, opt):
     data_provider = MatchData(1000)
     data_provider.roll_data()
 
@@ -266,21 +273,22 @@ def test(team_data):
         result = [testing_data[i][8]]
 
         prob = predict(
-            'epoch_3_params.pkl',
+            'epoch_9_params.pkl',
             home_state=home_current_state,
             home_vector=home_vector,
             away_state=away_current_state,
-            away_vector=away_vector
+            away_vector=away_vector,
+            opt = opt
         )
 
-        pred_win = np.argmax(prob.data.numpy())
+        pred_win = np.argmax(prob.data.cpu().numpy())
 
         if pred_win == result:
             correct += 1
             line = 'Test: %s Correct! Confidence=%s' % (i, prob.data[pred_win])
         else:
             wrong += 1
-            line = 'Test: %s Wrong! Confidence=%s' % (i, prob.data.numpy().tolist())
+            line = 'Test: %s Wrong! Confidence=%s' % (i, prob.data.cpu().numpy().tolist())
 
         print(line)
         log_file.write(line+'\n')
@@ -290,7 +298,12 @@ def test(team_data):
 
 
 
-
+# class network():
+    
+#     def __init__(self):
+#         pass
+    
+#     def set_input(self):
 
 
 

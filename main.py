@@ -7,7 +7,7 @@ import argparse
 from dnn import train_dnn
 import data_preprocess as dp
 from dnn import test
-from sklearn.decomposition import pca
+
 import numpy as np
 
 
@@ -42,18 +42,25 @@ def team_representations(type):
 def train_with_dnn(opt):
 
     team_data = team_representations('average')
-    train_dnn(10, team_data, opt)
+    train_dnn(50, team_data, opt)
 
 
-def test_with_dnn():
+def test_with_dnn(opt):
     team_data = team_representations('average')
-    test(team_data)
+    test(team_data, opt)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='basketball game prediction')
     parser.add_argument('--batch-size', type=int, default=64, metavar='N',
                     help='input batch size for training (default: 64)')
-    parser.add_argument('--cuda', action='store_true', default=False,
+    parser.add_argument('--cuda', type=int, default=1,
                     help='CUDA training')
+    parser.add_argument('--train', type=int, default=0,
+                    help='CUDA training')
+    parser.add_argument('--test', type=int, default=0,
+                    help='CUDA training')                               
     args = parser.parse_args()
-    train_with_dnn(args)
+    if args.train == 1:
+        train_with_dnn(args)
+    if args.test == 1:
+        test_with_dnn(args)
