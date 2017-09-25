@@ -6,6 +6,31 @@ import numpy as np
 __all__ = ['MatchData']
 
 
+def remove_duplicate(data):
+    pass
+
+
+def load_team_data():
+
+    team_data = []
+
+    with open('data/teamData.csv', 'r') as open_file:
+        lines = open_file.readlines()
+    lines = lines[1:]
+    # 6 9 12
+
+    def get_num(_str):
+        if len(_str) == 0:
+            return 0.0
+        _rec = _str.replace('%','')
+        return float(_rec)
+
+    for line in lines:
+        info = [get_num(x) for x in line.split(',')]
+        team_data.append(info)
+    return team_data
+
+
 def load_competitions():
     """
     Load Comepetions
@@ -38,6 +63,32 @@ def load_competitions():
         data.append(parts)
 
     return data
+
+
+class TeamData(object):
+
+    def __init__(self):
+        self._team = dict()
+
+    def get_team(self, id):
+        return self._team[id]
+
+    def process(self):
+
+        team_data = load_team_data()
+        current_arr = []
+        current_team = 0
+        for member in team_data:
+            if member[0] != current_team:
+                self._team[current_team] = current_arr
+                current_arr = []
+                current_team += 1
+            current_arr.extend(member[2:])
+
+    def test(self):
+
+        for key in self._team.keys():
+            print("KEY: %s NUMS: %s CONTENT: %s" %(key, len(self._team[key]), self._team[key]))
 
 
 class MatchData(object):
@@ -84,7 +135,6 @@ class MatchData(object):
                 f.write(line)
 
 
-
 def test_load_competitions():
 
     data = load_competitions()
@@ -98,10 +148,15 @@ def test_match_data():
     s.dump_matches_to_file('data/')
 
 
+def test_team_data():
+
+    s = TeamData()
+    s.process()
+
 
 if __name__ == '__main__':
 
-    test_match_data()
+    test_team_data()
 
 
 

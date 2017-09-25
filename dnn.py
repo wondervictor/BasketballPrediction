@@ -8,9 +8,12 @@ import torch
 import torch.nn as nn
 from torch.autograd import Variable
 import torch.nn.functional as F
+from data_preprocess import MatchData
+from team import Team
+import torch.optim as optimizer
 
-current_comp_vector = 8
-team_vector = 1024
+current_comp_vector = 2
+team_vector = 512
 
 
 class DNN(nn.Module):
@@ -69,13 +72,67 @@ class DNN(nn.Module):
         return output_prob, output_score
 
 
-def train_dnn():
+def train_dnn(epoches):
     """
     train dnn here
     :return: 
     :rtype: 
     """
-    pass
+
+    dnn = DNN()
+    data_provider = MatchData(1000)
+    team = Team()
+    dnn_optimizer = optimizer.Adam(dnn.parameters(), lr=0.001)
+    prob_criterion = torch.nn.CrossEntropyLoss()
+    score_criterion = torch.nn.MSELoss()
+
+    for i in range(epoches):
+        data_provider.roll_data()
+        train_data = data_provider.get_train_data()
+
+        for i in range(len(train_data)):
+            score = train_data[i][-2:]
+            score = [score[-1], score[-2]]
+            away_id = train_data[i][0]
+            home_id = train_data[i][1]
+            away_current_state = train_data[i][2:4]
+            home_current_state = train_data[i][4:7]
+            away_vector = team.get_team(away_id)
+            home_vector = team.get_team(home_id)
+
+            # TODO: MiniBatch
+            # TODO: Variable
+
+            output_prob, output_score = dnn.forward(
+                home_current_comp_vector=home_current_state,
+                home_team_vector=home_vector,
+                away_current_comp_vector=away_current_state,
+                away_team_vector=away_vector,
+            )
+            prob = 1 if score[1] > score[0] else 0
+
+            loss = prob_criterion(output_prob, prob)
+            loss += score_criterion(output_score, score)
+
+            dnn_optimizer.zero_grad()
+            loss.backward()
+            dnn_optimizer.step()
+
+            print("Sample: %s Loss: %s" % (i+1, loss.data[0]))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
