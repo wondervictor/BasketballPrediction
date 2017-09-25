@@ -10,6 +10,7 @@ from torch.autograd import Variable
 import torch.nn.functional as F
 from data_preprocess import MatchData
 from team import Team
+import os
 import torch.optim as optimizer
 
 current_comp_vector = 2
@@ -20,15 +21,18 @@ class DNN(nn.Module):
 
     def __init__(self):
         super(DNN, self).__init__()
-        self.input_team_home_layer = nn.Linear(current_comp_vector+team_vector, 256)
-        self.input_team_away_layer = nn.Linear(current_comp_vector+team_vector, 256)
-        self.home_team_layer = nn.Linear(256, 512)
-        self.away_team_layer = nn.Linear(256, 512)
-        self.comp_layer_1 = nn.Linear(1024, 512)
+        self.input_team_home_layer = nn.Linear(current_comp_vector+team_vector, 128)
+        self.input_team_away_layer = nn.Linear(current_comp_vector+team_vector, 128)
+        self.home_team_layer = nn.Linear(128, 256)
+        self.away_team_layer = nn.Linear(128, 256)
+        self.comp_layer_1 = nn.Linear(512, 512)
         self.comp_layer_2 = nn.Linear(512, 256)
         self.comp_layer_3 = nn.Linear(256, 256)
-        self.out_prob = nn.Linear(256, 2)
-        self.out_score = nn.Linear(256, 2)
+        self.comp_layer_4 = nn.Linear(256, 128)
+
+        self.out_prob = nn.Linear(128, 2)
+
+        self.out_score = nn.Linear(128, 2)
 
     def forward(self, home_team_vector, away_team_vector, home_current_comp_vector, away_current_comp_vector):
         """
@@ -65,11 +69,41 @@ class DNN(nn.Module):
         competition_round = F.relu(self.comp_layer_1(torch.cat([home_ready, away_ready])))
         competition_round = F.leaky_relu(self.comp_layer_2(competition_round), negative_slope=-0.5)
         competition_round = F.leaky_relu(self.comp_layer_3(competition_round), negative_slope=-0.5)
+        competition_round = F.leaky_relu(self.comp_layer_4(competition_round), negative_slope=-0.5)
 
         output_prob = F.softmax(self.out_prob(competition_round))
         output_score = self.out_score(competition_round)
 
         return output_prob, output_score
+
+
+def save_model(net, name):
+    path = 'model/'
+    torch.save(net, path+name)
+
+
+def load_model(name):
+    path = 'model/'
+    return torch.load(path+name)
+
+
+def predict(model_name, home_vector, away_vector, home_state, away_state):
+
+    net = load_model(model_name)
+    home_current_state = Variable(torch.FloatTensor(home_state))
+    away_current_state = Variable(torch.FloatTensor(away_state))
+
+    away_vector = Variable(torch.FloatTensor(away_vector))
+    home_vector = Variable(torch.FloatTensor(home_vector))
+
+    prob, _ = net(
+        home_current_comp_vector=home_current_state,
+        home_team_vector=home_vector,
+        away_current_comp_vector=away_current_state,
+        away_team_vector=away_vector,
+    )
+
+    return prob
 
 
 def train_dnn(epoches, team_data):
@@ -81,12 +115,12 @@ def train_dnn(epoches, team_data):
 
     dnn = DNN()
     data_provider = MatchData(1000)
-    dnn_optimizer = optimizer.Adam(dnn.parameters(), lr=0.001)
+    dnn_optimizer = optimizer.Adamax(dnn.parameters(), lr=0.001)
     prob_criterion = torch.nn.CrossEntropyLoss()
     score_criterion = torch.nn.MSELoss()
 
     print("Starting to train with DNN")
-    for i in range(epoches):
+    for epoch in range(epoches):
         data_provider.roll_data()
         train_data = data_provider.get_train_data()
 
@@ -130,6 +164,8 @@ def train_dnn(epoches, team_data):
             dnn_optimizer.step()
             if i % 10 == 0:
                 print("Sample: %s Loss: %s" % (i+1, loss.data[0]))
+                
+        save_model(dnn, 'epoch_%d_params.pkl' % epoch)
 
 
 

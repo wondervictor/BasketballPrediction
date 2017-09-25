@@ -65,6 +65,44 @@ def load_competitions():
     return data
 
 
+def tmp_load():
+
+    data = []
+    with open('data/new_2.csv') as open_file:
+        lines = open_file.readlines()
+
+    def get_record(rec_str):
+        rec_str = rec_str.replace('胜', ',')
+        rec_str = rec_str.replace('负', ',')
+        records = map(int, rec_str.split(',')[:-1])
+
+        return records
+
+    for line in lines[1:]:
+        elements = line.split(',')
+        print(elements[0:3])
+        parts = map(int, elements[0:3])
+
+        away_ago = get_record(elements[3])
+        home_ago = get_record(elements[4])
+
+        score = map(int, elements[5].split(':'))
+
+        parts =parts + away_ago + home_ago + score + map(int, elements[6:])
+
+        data.append(parts)
+
+    return data
+
+
+def tmp_write():
+    s = MatchData(1000)
+    s.roll_data()
+    s.dump_matches_to_file('data/')
+
+
+
+
 class TeamData(object):
 
     def __init__(self):
@@ -120,16 +158,16 @@ class MatchData(object):
 
     def dump_matches_to_file(self, file_dir):
 
-        csv_line = 'away,home,away_ago_win,away_ago_lose,home_ago_win,home_ago_lose,score_away,score_home\n'
+        #csv_line = 'away,home,away_ago_win,away_ago_lose,home_ago_win,home_ago_lose,score_away,score_home\n'
         with open(file_dir+'train.csv', 'w+') as f:
-            f.write(csv_line)
+        #    f.write(csv_line)
             for match in self.training_data:
                 line = ','.join(['%s' % x for x in match])
                 line += '\n'
                 f.write(line)
 
         with open(file_dir+'test.csv', 'w+') as f:
-            f.write(csv_line)
+        #    f.write(csv_line)
             for match in self.testing_data:
                 line = ','.join(['%s' % x for x in match])
                 line += '\n'
@@ -157,7 +195,7 @@ def test_team_data():
 
 if __name__ == '__main__':
 
-    test_team_data()
+    tmp_write()
 
 
 
