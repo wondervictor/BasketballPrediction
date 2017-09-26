@@ -63,7 +63,6 @@ def load_competitions():
         else:
             result = [1]
 
-
         parts = [away, home] + away_ago + home_ago + score + result
 
         data.append(parts)
@@ -105,8 +104,6 @@ def tmp_write():
     s = MatchData(1000)
     s.roll_data()
     s.dump_matches_to_file('data/')
-
-
 
 
 class TeamData(object):
@@ -164,16 +161,16 @@ class MatchData(object):
 
     def dump_matches_to_file(self, file_dir):
 
-        #csv_line = 'away,home,away_ago_win,away_ago_lose,home_ago_win,home_ago_lose,score_away,score_home\n'
+        csv_line = 'away,home,away_ago_win,away_ago_lose,home_ago_win,home_ago_lose,score_away,score_home,result\n'
         with open(file_dir+'train.csv', 'w+') as f:
-        #    f.write(csv_line)
+            f.write(csv_line)
             for match in self.training_data:
                 line = ','.join(['%s' % x for x in match])
                 line += '\n'
                 f.write(line)
 
         with open(file_dir+'test.csv', 'w+') as f:
-        #    f.write(csv_line)
+            f.write(csv_line)
             for match in self.testing_data:
                 line = ','.join(['%s' % x for x in match])
                 line += '\n'
@@ -201,7 +198,7 @@ def test_team_data():
 
 if __name__ == '__main__':
 
-    tmp_write()
+    test_match_data()
 
 
 

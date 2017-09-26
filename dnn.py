@@ -13,6 +13,7 @@ from team import Team
 import os
 import numpy as np
 import torch.optim as optimizer
+import random
 
 CURRENT_COMP_VECTOR_SIZE = 2
 TEAM_VECTOR_SIZE = 21
@@ -193,6 +194,30 @@ def train_dnn_batch(epoches, team_data, opt):
         save_model(dnn, 'epoch_%d_params.pkl' % epoch)
 
 
+def train_data():
+    with open('data/train.csv', 'r') as openfile:
+        lines = openfile.readlines()
+
+    data = []
+    for line in lines[1:]:
+        data.append(map(int, line.split(',')))
+
+    random.shuffle(data)
+    return data
+
+
+def test_data():
+
+    with open('data/test.csv', 'r') as openfile:
+        lines = openfile.readlines()
+
+    data = []
+    for line in lines[1:]:
+        data.append(map(int, line.split(',')))
+    random.shuffle(data)
+    return data
+
+
 def train_dnn(epoches, team_data, opt):
     """
     train dnn here
@@ -203,15 +228,16 @@ def train_dnn(epoches, team_data, opt):
     dnn = DNN()
     if opt.cuda == 1:
         dnn.cuda()
-    data_provider = MatchData(1000)
+    #data_provider = MatchData(1000)
     dnn_optimizer = optimizer.Adamax(dnn.parameters(), lr=0.001)
     prob_criterion = torch.nn.CrossEntropyLoss()
     score_criterion = torch.nn.MSELoss()
 
     print("Starting to train with DNN")
     for epoch in range(epoches):
-        data_provider.roll_data()
-        train_data = data_provider.get_train_data()
+        #data_provider.roll_data()
+        #train_data = data_provider.get_train_data()
+        train_data = train_data()
 
         for i in range(len(train_data)):
             #     Competition: [(Away, Home, Away_Ago_Win, Away_Ago_Lose, Home_Ago_Win, Home_Ago_Lose, Away_Score, Home_Score, Home_Win)]
@@ -271,8 +297,8 @@ def test(team_data, opt):
     data_provider = MatchData(1000)
     data_provider.roll_data()
 
-    testing_data = data_provider.get_test_data()
-
+    #testing_data = data_provider.get_test_data()
+    testing_data = test_data()
     log_file = open('testing.log', 'w+')
 
     correct = 0
