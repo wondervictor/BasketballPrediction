@@ -9,74 +9,15 @@ import torch.nn as nn
 from torch.autograd import Variable
 import torch.nn.functional as F
 from data_preprocess import MatchData
-from team import Team
+from models import DNN
 import os
 import numpy as np
 import torch.optim as optimizer
 import random
 
+
 CURRENT_COMP_VECTOR_SIZE = 2
 TEAM_VECTOR_SIZE = 21
-
-
-class DNN(nn.Module):
-
-    def __init__(self):
-        super(DNN, self).__init__()
-        self.input_team_home_layer = nn.Linear(CURRENT_COMP_VECTOR_SIZE+TEAM_VECTOR_SIZE, 128)
-        self.input_team_away_layer = nn.Linear(CURRENT_COMP_VECTOR_SIZE+TEAM_VECTOR_SIZE, 128)
-        self.home_team_layer = nn.Linear(128, 256)
-        self.away_team_layer = nn.Linear(128, 256)
-        self.comp_layer_1 = nn.Linear(512, 512)
-        self.comp_layer_2 = nn.Linear(512, 256)
-        self.comp_layer_3 = nn.Linear(256, 256)
-        self.comp_layer_4 = nn.Linear(256, 128)
-
-        self.out_prob = nn.Linear(128, 2)
-
-        self.out_score = nn.Linear(128, 2)
-
-    def forward(self, home_team_vector, away_team_vector, home_current_comp_vector, away_current_comp_vector):
-        """
-        
-        :param home_team_vector: Home Team Representation by team members
-        :type home_team_vector: Tensor [1x1024]
-        :param away_team_vector: Away Team Representation by team members
-        :type away_team_vector: Tensor [1x1024]
-        :param home_current_comp_vector: Current Competition State Info for Home Team
-        :type home_current_comp_vector: Tensor [1x8]
-        :param away_current_comp_vector: Current Competition State Info for Away Team
-        :type away_current_comp_vector: Tensor [1x8]
-        :return: output_probability output_score
-        :rtype: 
-        """
-        home_representation = F.leaky_relu(
-            self.input_team_home_layer(torch.cat([home_team_vector, home_current_comp_vector], dim=1)),
-            negative_slope=-0.1
-        )
-
-        away_representation = F.leaky_relu(
-            self.input_team_away_layer(torch.cat([away_team_vector, away_current_comp_vector], dim=1)),
-            negative_slope=-0.1
-        )
-
-        home_ready = F.tanh(
-            self.home_team_layer(home_representation)
-        )
-
-        away_ready = F.tanh(
-            self.away_team_layer(away_representation)
-        )
-
-        competition_round = F.relu(self.comp_layer_1(torch.cat([home_ready, away_ready], dim=1)))
-        competition_round = F.leaky_relu(self.comp_layer_2(competition_round), negative_slope=-0.5)
-        competition_round = F.leaky_relu(self.comp_layer_3(competition_round), negative_slope=-0.5)
-        competition_round = F.leaky_relu(self.comp_layer_4(competition_round), negative_slope=-0.5)
-
-        output_prob = F.softmax(self.out_prob(competition_round))
-        output_score = self.out_score(competition_round)
-
-        return output_prob, output_score
 
 
 def save_model(net, name):
@@ -194,7 +135,7 @@ def train_dnn_batch(epoches, team_data, opt):
         save_model(dnn, 'epoch_%d_params.pkl' % epoch)
 
 
-def train_data():
+def train_data_func():
     with open('data/train.csv', 'r') as openfile:
         lines = openfile.readlines()
 
@@ -229,7 +170,7 @@ def train_dnn(epoches, team_data, opt):
     if opt.cuda == 1:
         dnn.cuda()
     #data_provider = MatchData(1000)
-    dnn_optimizer = optimizer.Adamax(dnn.parameters(), lr=0.001)
+    dnn_optimizer = optimizer.Adamax(dnn.parameters(), lr=0.0001)
     prob_criterion = torch.nn.CrossEntropyLoss()
     score_criterion = torch.nn.MSELoss()
 
@@ -237,7 +178,7 @@ def train_dnn(epoches, team_data, opt):
     for epoch in range(epoches):
         #data_provider.roll_data()
         #train_data = data_provider.get_train_data()
-        train_data = train_data()
+        train_data = train_data_func()
 
         for i in range(len(train_data)):
             #     Competition: [(Away, Home, Away_Ago_Win, Away_Ago_Lose, Home_Ago_Win, Home_Ago_Lose, Away_Score, Home_Score, Home_Win)]

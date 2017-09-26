@@ -31,6 +31,15 @@ def team_representations(type):
 
             team_vector = team_vector/len(team)
             team_data[key] = team_vector
+    elif type == "rank_8":
+        for key in team_raw_data.keys():
+            team = team_raw_data[key]
+            team_vector = team[0]
+            for i in range(1, 9):
+                team_vector += team[i]
+
+            team_vector = team_vector/8
+            team_data[key] = team_vector
     else:
         print("Not Implemented!")
 
@@ -40,12 +49,12 @@ def team_representations(type):
 
 def train_with_dnn(opt):
     print(opt.batch_size)
-    team_data = team_representations('average')
-    dnn.train_dnn_batch(opt.epoch,team_data, opt)
+    team_data = team_representations(opt.team_data_type)
+    dnn.train_dnn(opt.epoch, team_data, opt)
 
 
 def test_with_dnn(opt):
-    team_data = team_representations('average')
+    team_data = team_representations(opt.team_data_type)
     dnn.test(team_data, opt)
 
 if __name__ == '__main__':
@@ -62,6 +71,8 @@ if __name__ == '__main__':
                     help='CUDA training')                               
     parser.add_argument('--model_name', type=str, default='epoch_9_params.pkl',
                     help='model name')
+    parser.add_argument('--team_data_type', type=str, default='average',
+                    help='team data type')
     args = parser.parse_args()
     if args.train == 1:
         train_with_dnn(args)
