@@ -28,7 +28,6 @@ def team_representations(type):
             team_vector = team[0]
             for i in range(1, len(team)):
                 team_vector += team[i]
-
             team_vector = team_vector/len(team)
             team_data[key] = team_vector
     elif type == "rank_8":
@@ -37,7 +36,6 @@ def team_representations(type):
             team_vector = team[0]
             for i in range(1, 9):
                 team_vector += team[i]
-
             team_vector = team_vector/8
             team_data[key] = team_vector
     else:
