@@ -89,19 +89,14 @@ def tmp_load():
         temp.append(i)
         i += 1
         elements = line.split(',')
-        # print(elements[0:2])
         parts = map(int, elements[0:2])
 
         away_ago = get_record(elements[2])
         home_ago = get_record(elements[3])
         away_ago[0] = -away_ago[0]
         home_ago[1] = -home_ago[1]
-
-
         parts = parts + away_ago + home_ago
-
         data.append(parts)
-    print(len(data))
     return data
 
 

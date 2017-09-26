@@ -73,7 +73,7 @@ if __name__ == '__main__':
                     help='CUDA training') 
     parser.add_argument('--predict', type=int, default=0,
                     help='predict result')                               
-    parser.add_argument('--model_name', type=str, default='epoch_9_params.pkl',
+    parser.add_argument('--model_name', type=str, default='epoch_30_params.pkl',
                     help='model name')
     parser.add_argument('--team_data_type', type=str, default='average',
                     help='team data type')

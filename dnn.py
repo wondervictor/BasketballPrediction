@@ -306,17 +306,11 @@ def test(team_data, opt):
 
     print("Wrong: %s Correct: %s" % (wrong, correct))
 
+
 def predict_result(team_data, opt):
-    data_provider = MatchData(1000)
-    data_provider.roll_data()
 
-    #testing_data = data_provider.get_test_data()
-    # testing_data = test_data()
     testing_data = tmp_load()
-    log_file = open('testing.log', 'w+')
-
-    correct = 0
-    wrong = 0
+    output_file = open('output/output.csv', 'w+')
 
     for i in range(len(testing_data)):
 
@@ -325,10 +319,8 @@ def predict_result(team_data, opt):
 
         away_current_state = testing_data[i][2:4]
         home_current_state = testing_data[i][4:6]
-        # score = [testing_data[i][7], testing_data[i][6]]
         away_vector = team_data[away_id]
         home_vector = team_data[home_id]
-        # result = [testing_data[i][8]]
 
         prob = predict(
             opt.model_name,
@@ -339,21 +331,11 @@ def predict_result(team_data, opt):
             opt=opt
         )
 
-        a = prob.data.cpu().numpy()
-        pred_win = np.argmax(prob.data.cpu().numpy())
-        print(prob.data.cpu().numpy())
-        # if pred_win == result:
-        #     correct += 1
-        #     line = 'Test: %s Correct! Confidence=%s' % (i, prob.data[pred_win])
-        # else:
-        #     wrong += 1
-        #     line = 'Test: %s Wrong! Confidence=%s' % (i, prob.data.cpu().numpy().tolist())
+        prob = prob.data[1]
+        line = '%s\n' % prob
+        output_file.write(line)
+    output_file.close()
 
-        # print(line)
-        # log_file.write(line+'\n')
-    log_file.close()
-
-    # print("Wrong: %s Correct: %s" % (wrong, correct))
 
 
 
