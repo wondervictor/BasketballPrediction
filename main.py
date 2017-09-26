@@ -4,9 +4,8 @@
 Main
 """
 import argparse
-from dnn import train_dnn
 import data_preprocess as dp
-from dnn import test
+import dnn as dnn
 
 import numpy as np
 
@@ -40,14 +39,14 @@ def team_representations(type):
 
 
 def train_with_dnn(opt):
-
+    print(opt.batch_size)
     team_data = team_representations('average')
-    train_dnn(50, team_data, opt)
+    dnn.train_dnn_batch(50,team_data, opt)
 
 
 def test_with_dnn(opt):
     team_data = team_representations('average')
-    test(team_data, opt)
+    dnn.test(team_data, opt)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='basketball game prediction')

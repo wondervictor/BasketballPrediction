@@ -50,12 +50,12 @@ class DNN(nn.Module):
         :rtype: 
         """
         home_representation = F.leaky_relu(
-            self.input_team_home_layer(torch.cat([home_team_vector, home_current_comp_vector])),
+            self.input_team_home_layer(torch.cat([home_team_vector, home_current_comp_vector], dim=1)),
             negative_slope=-0.1
         )
 
         away_representation = F.leaky_relu(
-            self.input_team_away_layer(torch.cat([away_team_vector, away_current_comp_vector])),
+            self.input_team_away_layer(torch.cat([away_team_vector, away_current_comp_vector], dim=1)),
             negative_slope=-0.1
         )
 
@@ -67,7 +67,7 @@ class DNN(nn.Module):
             self.away_team_layer(away_representation)
         )
 
-        competition_round = F.relu(self.comp_layer_1(torch.cat([home_ready, away_ready])))
+        competition_round = F.relu(self.comp_layer_1(torch.cat([home_ready, away_ready], dim=1)))
         competition_round = F.leaky_relu(self.comp_layer_2(competition_round), negative_slope=-0.5)
         competition_round = F.leaky_relu(self.comp_layer_3(competition_round), negative_slope=-0.5)
         competition_round = F.leaky_relu(self.comp_layer_4(competition_round), negative_slope=-0.5)
@@ -91,7 +91,7 @@ def load_model(name):
 def predict(model_name, home_vector, away_vector, home_state, away_state, opt):
 
     net = load_model(model_name)
-    if opt.cuda ==1:
+    if opt.cuda == 1:
         home_current_state = Variable(torch.FloatTensor(home_state).cuda())
         away_current_state = Variable(torch.FloatTensor(away_state).cuda())
 
@@ -104,6 +104,11 @@ def predict(model_name, home_vector, away_vector, home_state, away_state, opt):
         away_vector = Variable(torch.FloatTensor(away_vector))
         home_vector = Variable(torch.FloatTensor(home_vector))
 
+    home_current_state = home_current_state.unsqueeze(0)
+    away_current_state = away_current_state.unsqueeze(0)
+    home_vector = home_vector.unsqueeze(0)
+    away_vector = away_vector.unsqueeze(0)
+
     prob, _ = net(
         home_current_comp_vector=home_current_state,
         home_team_vector=home_vector,
@@ -114,12 +119,14 @@ def predict(model_name, home_vector, away_vector, home_state, away_state, opt):
     return prob
 
 
-def train_dnn_batch(epoches, batch_size, team_data):
+def train_dnn_batch(epoches, team_data, opt):
     """
-    train dnn here
+    train mini batch dnn here
     :return: 
     :rtype: 
     """
+
+    batch_size = opt.batch_size
     dnn = DNN()
     if opt.cuda == 1:
         dnn.cuda()
@@ -140,8 +147,8 @@ def train_dnn_batch(epoches, batch_size, team_data):
             batch_home_vector = Variable(torch.zeros((batch_size, TEAM_VECTOR_SIZE)))
             batch_away_vector = Variable(torch.zeros((batch_size, TEAM_VECTOR_SIZE)))
 
-            batch_score = Variable(torch.zeros((batch_size,2)))
-            batch_result = Variable(torch.zeros(batch_size))
+            batch_score = Variable(torch.zeros((batch_size, 2)))
+            batch_result = []
 
             for p in range(batch_size):
                 away_id = train_data[i+p][0]
@@ -152,14 +159,22 @@ def train_dnn_batch(epoches, batch_size, team_data):
                 score = [train_data[i+p][7], train_data[i+p][6]]
                 away_vector = team_data[away_id]
                 home_vector = team_data[home_id]
-                result = [train_data[i+p][8]]
+                result = train_data[i+p][8]
 
                 batch_home_current_state[p] = Variable(torch.FloatTensor(home_current_state))
                 batch_away_current_state[p] = Variable(torch.FloatTensor(away_current_state))
                 batch_away_vector[p] = Variable(torch.FloatTensor(away_vector))
                 batch_home_vector[p] = Variable(torch.FloatTensor(home_vector))
                 batch_score[p] = Variable(torch.FloatTensor(score))
-                batch_result[p] = result
+                batch_result.append(result)
+            batch_result = Variable(torch.LongTensor(batch_result))
+            if opt.cuda == 1:
+                batch_home_current_state = batch_home_current_state.cuda()
+                batch_away_current_state = batch_home_current_state.cuda()
+                batch_home_vector = batch_home_current_state.cuda()
+                batch_away_vector = batch_home_current_state.cuda()
+                batch_result = batch_result.cuda()
+                batch_score = batch_score.cuda()
 
             output_prob, output_score = dnn.forward(
                 home_current_comp_vector=batch_home_current_state,
@@ -167,7 +182,7 @@ def train_dnn_batch(epoches, batch_size, team_data):
                 away_current_comp_vector=batch_away_current_state,
                 away_team_vector=batch_away_vector,
             )
-            loss = prob_criterion(output_prob, result)
+            loss = prob_criterion(output_prob, batch_result)
             #loss += 0.001*score_criterion(output_score, batch_score)
 
             dnn_optimizer.zero_grad()
@@ -211,7 +226,6 @@ def train_dnn(epoches, team_data, opt):
             result = [train_data[i][8]]
 
 
-            # TODO: MiniBatch
             if opt.cuda == 1:
                 home_current_state = Variable(torch.FloatTensor(home_current_state).cuda())
                 away_current_state = Variable(torch.FloatTensor(away_current_state).cuda())
@@ -230,13 +244,17 @@ def train_dnn(epoches, team_data, opt):
 
                 score = Variable(torch.FloatTensor(score))
 
+            home_current_state = home_current_state.unsqueeze(0)
+            away_current_state = away_current_state.unsqueeze(0)
+            home_vector = home_vector.unsqueeze(0)
+            away_vector = away_vector.unsqueeze(0)
+
             output_prob, output_score = dnn.forward(
                 home_current_comp_vector=home_current_state,
                 home_team_vector=home_vector,
                 away_current_comp_vector=away_current_state,
                 away_team_vector=away_vector,
             )
-            output_prob = output_prob.unsqueeze(0)
             loss = prob_criterion(output_prob, prob)
             #loss += 0.001*score_criterion(output_score, score)
 
