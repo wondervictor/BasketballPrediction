@@ -311,6 +311,7 @@ def predict_result(team_data, opt):
 
     testing_data = tmp_load()
     output_file = open('output/predictPro.csv', 'rw+')
+    output_file.write('主场赢得比赛的置信度\n')
 
     for i in range(len(testing_data)):
 
