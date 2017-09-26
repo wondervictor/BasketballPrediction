@@ -310,7 +310,7 @@ def test(team_data, opt):
 def predict_result(team_data, opt):
 
     testing_data = tmp_load()
-    output_file = open('output/output.csv', 'w+')
+    output_file = open('output/predictPro.csv', 'rw+')
 
     for i in range(len(testing_data)):
 
@@ -332,38 +332,10 @@ def predict_result(team_data, opt):
         )
 
         prob = prob.data[1]
-        line = '%s\n' % prob
-        output_file.write(line)
+        line = '%s' % prob
+        output_file.write(line+'\n')
+
     output_file.close()
-
-
-
-
-# class network():
-    
-#     def __init__(self):
-#         pass
-    
-#     def set_input(self):
-
-
-
-
-
-
-
-
-
-
-
-
-
-# class network():
-    
-#     def __init__(self):
-#         pass
-    
-#     def set_input(self):
 
 
 
