@@ -58,6 +58,8 @@ if __name__ == '__main__':
                     help='CUDA training')
     parser.add_argument('--test', type=int, default=0,
                     help='CUDA training')                               
+    parser.add_argument('--model_name', type=str, default='epoch_9_params.pkl',
+                    help='model name')
     args = parser.parse_args()
     if args.train == 1:
         train_with_dnn(args)
