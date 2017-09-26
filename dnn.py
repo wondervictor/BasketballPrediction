@@ -116,7 +116,7 @@ def predict(model_name, home_vector, away_vector, home_state, away_state, opt):
         away_current_comp_vector=away_current_state,
         away_team_vector=away_vector,
     )
-
+    prob = prob.squeeze(0)
     return prob
 
 
@@ -322,7 +322,7 @@ def test(team_data, opt):
             home_vector=home_vector,
             away_state=away_current_state,
             away_vector=away_vector,
-            opt = opt
+            opt=opt
         )
 
         pred_win = np.argmax(prob.data.cpu().numpy())
