@@ -98,10 +98,10 @@ def tmp_load():
         home_ago[1] = -home_ago[1]
 
 
-        parts =temp + parts + away_ago + home_ago
+        parts = parts + away_ago + home_ago
 
         data.append(parts)
-    print(data[30])
+    print(len(data))
     return data
 
 

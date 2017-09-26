@@ -164,6 +164,7 @@ def test_data():
         data[i][6] = -data[i][6]
         i += 1
     random.shuffle(data)
+    print(data[0])
     return data
 
 
@@ -340,7 +341,7 @@ def predict_result(team_data, opt):
 
         a = prob.data.cpu().numpy()
         pred_win = np.argmax(prob.data.cpu().numpy())
-        print(prob.data)
+        print(prob.data.cpu().numpy())
         # if pred_win == result:
         #     correct += 1
         #     line = 'Test: %s Correct! Confidence=%s' % (i, prob.data[pred_win])
