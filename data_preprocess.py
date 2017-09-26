@@ -71,9 +71,10 @@ def load_competitions():
 
 
 def tmp_load():
+    i = 0
 
     data = []
-    with open('data/new_2.csv') as open_file:
+    with open('./matchDataTest.csv') as open_file:
         lines = open_file.readlines()
 
     def get_record(rec_str):
@@ -84,19 +85,23 @@ def tmp_load():
         return records
 
     for line in lines[1:]:
+        temp =[]
+        temp.append(i)
+        i += 1
         elements = line.split(',')
-        print(elements[0:3])
-        parts = map(int, elements[0:3])
+        # print(elements[0:2])
+        parts = map(int, elements[0:2])
 
-        away_ago = get_record(elements[3])
-        home_ago = get_record(elements[4])
+        away_ago = get_record(elements[2])
+        home_ago = get_record(elements[3])
+        away_ago[0] = -away_ago[0]
+        home_ago[1] = -home_ago[1]
 
-        score = map(int, elements[5].split(':'))
 
-        parts =parts + away_ago + home_ago + score + map(int, elements[6:])
+        parts =temp + parts + away_ago + home_ago
 
         data.append(parts)
-
+    print(data[30])
     return data
 
 

@@ -8,7 +8,7 @@ import torch
 import torch.nn as nn
 from torch.autograd import Variable
 import torch.nn.functional as F
-from data_preprocess import MatchData
+from data_preprocess import MatchData, tmp_load
 from models import DNN
 import os
 import numpy as np
@@ -18,7 +18,7 @@ import random
 
 CURRENT_COMP_VECTOR_SIZE = 2
 TEAM_VECTOR_SIZE = 21
-
+LEARNING_RATE = 0.0001
 
 def save_model(net, name):
     path = 'model/'
@@ -154,7 +154,7 @@ def test_data():
 
     with open('data/test.csv', 'r') as openfile:
         lines = openfile.readlines()
-        
+    
     data = []
     i = 0
     for line in lines[1:]:
@@ -173,12 +173,12 @@ def train_dnn(epoches, team_data, opt):
     :return: 
     :rtype: 
     """
-
+    LEARNING_RATE = 0.0001
     dnn = DNN()
     if opt.cuda == 1:
         dnn.cuda()
     #data_provider = MatchData(1000)
-    dnn_optimizer = optimizer.Adamax(dnn.parameters(), lr=0.0001)
+    dnn_optimizer = optimizer.Adamax(dnn.parameters(), lr=LEARNING_RATE)
     prob_criterion = torch.nn.CrossEntropyLoss()
     score_criterion = torch.nn.MSELoss()
 
@@ -187,7 +187,14 @@ def train_dnn(epoches, team_data, opt):
         #data_provider.roll_data()
         #train_data = data_provider.get_train_data()
         train_data = train_data_func()
-
+        if epoch == 35:
+            LEARNING_RATE = LEARNING_RATE/5.0
+            for param_group in dnn_optimizer.param_groups:
+                param_group['lr'] = LEARNING_RATE
+        if epoch == 100:
+            LEARNING_RATE = LEARNING_RATE/10.0
+            for param_group in dnn_optimizer.param_groups:
+                param_group['lr'] = LEARNING_RATE
         for i in range(len(train_data)):
             #     Competition: [(Away, Home, Away_Ago_Win, Away_Ago_Lose, Home_Ago_Win, Home_Ago_Lose, Away_Score, Home_Score, Home_Win)]
             away_id = train_data[i][0]
@@ -199,6 +206,7 @@ def train_dnn(epoches, team_data, opt):
             away_vector = team_data[away_id]
             home_vector = team_data[home_id]
             result = [train_data[i][8]]
+
 
 
             if opt.cuda == 1:
@@ -230,14 +238,21 @@ def train_dnn(epoches, team_data, opt):
                 away_current_comp_vector=away_current_state,
                 away_team_vector=away_vector,
             )
+
             loss = prob_criterion(output_prob, prob)
             #loss += 0.001*score_criterion(output_score, score)
 
+            # a, b = output_prob.data.cpu().numpy()[0][0], output_prob.cpu().data.numpy()[0][1]
+            # if float(a)/float(b) > 9 or float(a)/float(b)< (1.0/9.0):
+            #     for param_group in dnn_optimizer.param_groups:
+            #         param_group['lr'] = LEARNING_RATE*10
+                
             dnn_optimizer.zero_grad()
             loss.backward()
             dnn_optimizer.step()
-            if i % 10 == 0:
-                print("Sample: %s Loss: %s" % (i+1, loss.data[0]))
+
+            if i % 100 == 0:
+                print("Epoches: %s Sample: %s Loss: %s" % (epoch, i+1, loss.data[0]))
 
         save_model(dnn, 'epoch_%d_params.pkl' % epoch)
 
@@ -248,6 +263,7 @@ def test(team_data, opt):
 
     #testing_data = data_provider.get_test_data()
     testing_data = test_data()
+
     log_file = open('testing.log', 'w+')
 
     correct = 0
@@ -288,6 +304,74 @@ def test(team_data, opt):
     log_file.close()
 
     print("Wrong: %s Correct: %s" % (wrong, correct))
+
+def predict_result(team_data, opt):
+    data_provider = MatchData(1000)
+    data_provider.roll_data()
+
+    #testing_data = data_provider.get_test_data()
+    # testing_data = test_data()
+    testing_data = tmp_load()
+    log_file = open('testing.log', 'w+')
+
+    correct = 0
+    wrong = 0
+
+    for i in range(len(testing_data)):
+
+        away_id = testing_data[i][0]
+        home_id = testing_data[i][1]
+
+        away_current_state = testing_data[i][2:4]
+        home_current_state = testing_data[i][4:6]
+        # score = [testing_data[i][7], testing_data[i][6]]
+        away_vector = team_data[away_id]
+        home_vector = team_data[home_id]
+        # result = [testing_data[i][8]]
+
+        prob = predict(
+            opt.model_name,
+            home_state=home_current_state,
+            home_vector=home_vector,
+            away_state=away_current_state,
+            away_vector=away_vector,
+            opt=opt
+        )
+
+        a = prob.data.cpu().numpy()
+        pred_win = np.argmax(prob.data.cpu().numpy())
+        print(prob.data)
+        # if pred_win == result:
+        #     correct += 1
+        #     line = 'Test: %s Correct! Confidence=%s' % (i, prob.data[pred_win])
+        # else:
+        #     wrong += 1
+        #     line = 'Test: %s Wrong! Confidence=%s' % (i, prob.data.cpu().numpy().tolist())
+
+        # print(line)
+        # log_file.write(line+'\n')
+    log_file.close()
+
+    # print("Wrong: %s Correct: %s" % (wrong, correct))
+
+
+
+# class network():
+    
+#     def __init__(self):
+#         pass
+    
+#     def set_input(self):
+
+
+
+
+
+
+
+
+
+
 
 
 

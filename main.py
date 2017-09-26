@@ -55,6 +55,10 @@ def test_with_dnn(opt):
     team_data = team_representations(opt.team_data_type)
     dnn.test(team_data, opt)
 
+def predict(opt):
+    team_data = team_representations(opt.team_data_type)
+    dnn.predict_result(team_data, opt)
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='basketball game prediction')
     parser.add_argument('--batch-size', type=int, default=64, metavar='N',
@@ -66,7 +70,9 @@ if __name__ == '__main__':
     parser.add_argument('--train', type=int, default=0,
                     help='CUDA training')
     parser.add_argument('--test', type=int, default=0,
-                    help='CUDA training')                               
+                    help='CUDA training') 
+    parser.add_argument('--predict', type=int, default=0,
+                    help='predict result')                               
     parser.add_argument('--model_name', type=str, default='epoch_9_params.pkl',
                     help='model name')
     parser.add_argument('--team_data_type', type=str, default='average',
@@ -76,3 +82,5 @@ if __name__ == '__main__':
         train_with_dnn(args)
     if args.test == 1:
         test_with_dnn(args)
+    if args.predict == 1:
+        predict(args)
