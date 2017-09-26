@@ -41,7 +41,7 @@ def team_representations(type):
 def train_with_dnn(opt):
     print(opt.batch_size)
     team_data = team_representations('average')
-    dnn.train_dnn_batch(50,team_data, opt)
+    dnn.train_dnn_batch(opt.epoch,team_data, opt)
 
 
 def test_with_dnn(opt):
@@ -52,6 +52,8 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='basketball game prediction')
     parser.add_argument('--batch-size', type=int, default=64, metavar='N',
                     help='input batch size for training (default: 64)')
+    parser.add_argument('--epoch', type=int, default=10,
+                    help='epoch number')               
     parser.add_argument('--cuda', type=int, default=1,
                     help='CUDA training')
     parser.add_argument('--train', type=int, default=0,
