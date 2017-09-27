@@ -20,7 +20,6 @@ def train(team_raw_data):
         home_state = x[4:6]
 
         input_vector = home_vector.tolist() + home_state + away_vector.tolist() + away_state
-        #input_vector = np.array(input_vector)
 
         train_x.append(input_vector)
         train_y.append(x[-1])
@@ -31,12 +30,12 @@ def train(team_raw_data):
 
 
 def test(team_raw_data):
-    train_data = test_data()
+    __test_data = test_data()
     svm_model = svm.load_model('svm_model_params.pkl')
     log_file = open('log/svm.log', 'w+')
     correct = 0
     wrong = 0
-    for x in train_data:
+    for x in __test_data:
         home = x[1]
         away = x[0]
         home_vector = team_raw_data[home]
@@ -47,9 +46,12 @@ def test(team_raw_data):
 
         input_vector = home_vector.tolist() + home_state + away_vector.tolist() + away_state
 
-        pred = svm.predict(svm_model, input_vector)
-        line = 'SVM: Pred:%s Real: %s' % (pred[0], x[-1])
-        if pred[0] == x[-1]:
+        pred = svm.predict(svm_model, input_vector)[0]
+        pred_id = 1
+        if pred < 0.5:
+            pred_id = 0
+        line = 'SVM: Pred:%s Real: %s Confidence=%s' % (pred_id, x[-1], pred)
+        if pred_id == x[-1]:
             correct += 1
         else:
             wrong += 1

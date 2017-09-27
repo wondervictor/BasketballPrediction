@@ -12,13 +12,8 @@ import pickle
 
 
 def svm_model(train_x, train_y):
-    # svm = SVC(
-    #     kernel='rbf',
-    #     C=1.0,
-    #     max_iter=40,
-    #     gamma=20.0
-    # )
-    svm = SVC(
+
+    svm = SVR(
         max_iter=1000000,
         kernel='rbf',
         C=1.0,
