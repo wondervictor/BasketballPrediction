@@ -9,6 +9,7 @@ import torch.nn as nn
 from torch.autograd import Variable
 import torch.nn.functional as F
 from data_process import MatchData, tmp_load
+from data_process import test_data, train_data_func
 from models.dnn import DNN
 import os
 import numpy as np
@@ -19,6 +20,7 @@ import random
 CURRENT_COMP_VECTOR_SIZE = 2
 TEAM_VECTOR_SIZE = 21
 LEARNING_RATE = 0.0001
+
 
 def save_model(net, name):
     path = 'model/'
@@ -134,38 +136,6 @@ def train_dnn_batch(epoches, team_data, opt):
                 print("Batch: %s Loss: %s" % (i+1, loss.data[0]))
         save_model(dnn, 'epoch_%d_params.pkl' % epoch)
 
-
-def train_data_func():
-    with open('data/train.csv', 'r') as openfile:
-        lines = openfile.readlines()
-    i = 0
-    data = []
-    for line in lines[1:]:
-        data.append(map(int, line.split(',')))
-        data[i][2] = -data[i][2]
-        data[i][5] = -data[i][5]
-        data[i][6] = -data[i][6]
-        i += 1
-    random.shuffle(data)
-    return data
-
-
-def test_data():
-
-    with open('data/test.csv', 'r') as openfile:
-        lines = openfile.readlines()
-    
-    data = []
-    i = 0
-    for line in lines[1:]:
-        data.append(map(int, line.split(',')))
-        data[i][2] = -data[i][2]
-        data[i][5] = -data[i][5]
-        data[i][6] = -data[i][6]
-        i += 1
-    random.shuffle(data)
-    print(data[0])
-    return data
 
 
 def train_dnn(epoches, team_data, opt):
