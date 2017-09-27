@@ -5,6 +5,7 @@ import torch.nn.functional as F
 CURRENT_COMP_VECTOR_SIZE = 2
 TEAM_VECTOR_SIZE = 21
 
+
 class DNN(nn.Module):
     
     def __init__(self):
@@ -65,10 +66,6 @@ class DNN(nn.Module):
         return output_prob, output_score
 
 
-
-
-
-    
 class AllInputModel(nn.Module):
     def __init__():
         pass
