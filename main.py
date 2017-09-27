@@ -4,60 +4,35 @@
 Main
 """
 import argparse
-import data_preprocess as dp
-import dnn as dnn
-
+import data_process as dp
+import models.team as team
 import numpy as np
+import train_dnn
 
 
-def team_representations(type):
-    """
-    Process Team Data to Retrieve its Representations
-    :return Tensor [1x21]
-    """
+def get_team_representations(type):
 
     team_data = dp.TeamData()
     team_data.process()
     team_raw_data = team_data.get_team()
+    return team.team_representations(team_raw_data, type)
 
-    team_data = dict()
-    # Average
-    if type == "average":
-        for key in team_raw_data.keys():
-            team = team_raw_data[key]
-            team_vector = team[0]
-            for i in range(1, len(team)):
-                team_vector += team[i]
-            team_vector = team_vector/len(team)
-            team_data[key] = team_vector
-    elif type == "rank_8":
-        for key in team_raw_data.keys():
-            team = team_raw_data[key]
-            team_vector = team[0]
-            for i in range(1, 9):
-                team_vector += team[i]
-            team_vector = team_vector/8
-            team_data[key] = team_vector
-    else:
-        print("Not Implemented!")
-
-    print("Team Data Prepared Finished!")
-    return team_data
 
 
 def train_with_dnn(opt):
     print(opt.batch_size)
-    team_data = team_representations(opt.team_data_type)
-    dnn.train_dnn(opt.epoch, team_data, opt)
+    team_data = get_team_representations(opt.team_data_type)
+    train_dnn.train_dnn(opt.epoch, team_data, opt)
 
 
 def test_with_dnn(opt):
-    team_data = team_representations(opt.team_data_type)
-    dnn.test(team_data, opt)
+    team_data = get_team_representations(opt.team_data_type)
+    train_dnn.test(team_data, opt)
+
 
 def predict(opt):
-    team_data = team_representations(opt.team_data_type)
-    dnn.predict_result(team_data, opt)
+    team_data = get_team_representations(opt.team_data_type)
+    train_dnn.predict_result(team_data, opt)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='basketball game prediction')

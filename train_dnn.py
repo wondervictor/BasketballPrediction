@@ -8,8 +8,8 @@ import torch
 import torch.nn as nn
 from torch.autograd import Variable
 import torch.nn.functional as F
-from data_preprocess import MatchData, tmp_load
-from models import DNN
+from data_process import MatchData, tmp_load
+from models.dnn import DNN
 import os
 import numpy as np
 import torch.optim as optimizer
