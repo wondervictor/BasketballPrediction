@@ -178,8 +178,6 @@ def train_dnn(epoches, team_data, opt):
             home_vector = team_data[home_id]
             result = [train_data[i][8]]
 
-
-
             if opt.cuda == 1:
                 home_current_state = Variable(torch.FloatTensor(home_current_state).cuda())
                 away_current_state = Variable(torch.FloatTensor(away_current_state).cuda())

@@ -53,7 +53,8 @@ def predict_svm(opt):
 
 
 def test_svm(opt):
-    pass
+    team_data = get_team_representations(opt.team_data_type)
+    svm.test(team_data)
 
 
 if __name__ == '__main__':
