@@ -7,6 +7,7 @@ import argparse
 import data_process as dp
 import models.team as team
 import train_svm as svm
+import train_xgboost as xgboost
 import numpy as np
 import train_dnn
 
@@ -56,6 +57,21 @@ def test_svm(opt):
     team_data = get_team_representations(opt.team_data_type)
     svm.test(team_data)
 
+### XGBoost
+def train_xgboost(opt):
+    team_data = get_team_representations(opt.team_data_type)
+    xgboost.train(team_data)
+
+def test_xgboost(opt):
+    team_data = get_team_representations(opt.team_data_type)
+    xgboost.test(team_data)
+
+def predict_xgboost(opt):
+    team_data = get_team_representations(opt.team_data_type)
+    xgboost.test(team_data)
+
+
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='basketball game prediction')
@@ -70,7 +86,7 @@ if __name__ == '__main__':
     parser.add_argument('--test', type=int, default=0,
                     help='CUDA training')
     parser.add_argument('--model', type=int, default=0,
-                    help='Choose model (dnn=0,svm=1)')
+                    help='Choose model (dnn=0,svm=1,xgboost=2)')
     parser.add_argument('--predict', type=int, default=0,
                     help='predict result')                               
     parser.add_argument('--model_param', type=str, default='epoch_30_params.pkl',
@@ -84,15 +100,22 @@ if __name__ == '__main__':
             train_with_dnn(args)
         elif args.model == 1:
             train_svm(args)
+        elif args.model == 2:
+            train_xgboost(args)
+
     if args.test == 1:
         if args.model == 0:
             test_with_dnn(args)
         elif args.model == 1:
             test_svm(args)
+        elif args.model == 2:
+            test_xgboost(args)
 
     if args.predict == 1:
         if args.model == 0:
             predict_dnn(args)
         elif args.model == 1:
             predict_svm(args)
+        elif args.model == 2:
+            predict_xgboost(args)
 

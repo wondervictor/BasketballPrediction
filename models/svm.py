@@ -13,11 +13,12 @@ import pickle
 
 def svm_model(train_x, train_y):
 
-    svm = SVR(
+    svm = SVC(
+        probability=True,
         max_iter=1000000,
         kernel='rbf',
         C=1.0,
-        gamma=20.0,
+        gamma=100.0,
     )
 
     svm.fit(train_x, train_y)
