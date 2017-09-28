@@ -3,7 +3,7 @@
 from data_process import test_data_func, train_data_func, tmp_load
 import numpy as np
 import models.boost as boost
-from evaluate import auc
+from evaluate import auc, acc
 
 
 def train(team_raw_data, opt):
@@ -35,7 +35,7 @@ def train(team_raw_data, opt):
 def test(team_raw_data):
     test_x = []
     y = []
-    train_data = train_data_func()
+    train_data = test_data_func()
     __boost = boost.Boost()
     __boost.load_model()
     for x in train_data:
@@ -51,7 +51,10 @@ def test(team_raw_data):
         y.append(x[-1])
         test_x.append(input_vector)
     pred_y = __boost.predict(test_x)
-    print(auc(y, pred_y))
+    auc_ = auc(y, pred_y)
+    acc(y, pred_y)
+    print("AUC:%s" % auc_)
+
 
     with open('log/xgboost_test.log', 'w+') as f:
         for i in range(len(pred_y)):

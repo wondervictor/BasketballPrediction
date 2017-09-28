@@ -13,19 +13,20 @@ class Boost(object):
         'scale_pos_weight': 1400.0 / 13458.0,
         'eval_metric': 'auc',
         'gamma':0.1,
-        'max_depth':15,
+        'max_depth':10,
         'lambda ': 550,
         'subsample':0.7,
         'colsample_bytree':0.4,
         'min_child_weight':3,
-        'eta': 0.02,
-        'seed':231,
+        'eta': 0.03,
+        'seed':2321531,
         'nthread':2,
+        'max_delta_step':1
         }
 
     def train(self, train_x, train_y):
         d_train = xgb.DMatrix(train_x, label=train_y)
-        self.model = xgb.train(self.params, d_train, num_boost_round=10000)
+        self.model = xgb.train(self.params, d_train, num_boost_round=1000)
 
     def predict(self, x):
         x = xgb.DMatrix(x)
