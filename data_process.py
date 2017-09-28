@@ -211,7 +211,7 @@ def train_data_func():
     return data
 
 
-def test_data():
+def test_data_func():
     with open('data/test.csv', 'r') as openfile:
         lines = openfile.readlines()
 

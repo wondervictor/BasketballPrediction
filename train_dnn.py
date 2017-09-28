@@ -9,7 +9,7 @@ import torch.nn as nn
 from torch.autograd import Variable
 import torch.nn.functional as F
 from data_process import MatchData, tmp_load
-from data_process import test_data, train_data_func
+from data_process import test_data_func, train_data_func
 from models.dnn import DNN
 import os
 import numpy as np
@@ -159,6 +159,10 @@ def train_dnn(epoches, team_data, opt):
         #data_provider.roll_data()
         #train_data = data_provider.get_train_data()
         train_data = train_data_func()
+        if opt.dataset == "all":
+            test_data = test_data_func()
+            train_data += test_data
+            
         if epoch == 35:
             LEARNING_RATE = LEARNING_RATE/5.0
             for param_group in dnn_optimizer.param_groups:
@@ -223,8 +227,13 @@ def train_dnn(epoches, team_data, opt):
 
             if i % 100 == 0:
                 print("Epoches: %s Sample: %s Loss: %s" % (epoch, i+1, loss.data[0]))
-
-        save_model(dnn, 'epoch_%d_params.pkl' % epoch)
+        if opt.dataset == "train":
+            save_model(dnn, 'train_epoch_%d.pkl' % epoch)
+        elif opt.dataset == "all":
+            save_model(dnn, 'all_epoch_%d.pkl' % epoch)
+        else:
+            print("dataset error")
+            
 
 
 def test(team_data, opt):

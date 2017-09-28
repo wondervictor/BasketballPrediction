@@ -1,15 +1,18 @@
 # -*- coding: utf-8 -*-
 
 import models.svm as svm
-from data_process import test_data, train_data_func
+from data_process import test_data_func, train_data_func
 import numpy as np
 
 
-def train(team_raw_data):
+def train(team_raw_data, opt):
 
     train_x = []
     train_y = []
     train_data = train_data_func()
+    if opt.dataset == "all":
+        test_data = test_data_func()
+        train_data += test_data_func
     for x in train_data:
         home = x[1]
         away = x[0]
