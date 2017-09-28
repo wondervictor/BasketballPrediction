@@ -28,8 +28,13 @@ def train(team_raw_data, opt):
         train_y.append(x[-1])
 
     __svm = svm.svm_model(train_x, train_y)
-
-    svm.save_model(__svm, 'svm_model_params.pkl')
+    
+    if opt.dataset == "train":
+        svm.save_model(__svm, 'train_svm_%d.pkl.pkl')
+    elif opt.dataset == "all":
+        svm.save_model(__svm, 'all_svm_%d.pkl.pkl')
+    else:
+        print("choose dataset error")
 
 
 def test(team_raw_data):

@@ -228,9 +228,9 @@ def train_dnn(epoches, team_data, opt):
             if i % 100 == 0:
                 print("Epoches: %s Sample: %s Loss: %s" % (epoch, i+1, loss.data[0]))
         if opt.dataset == "train":
-            save_model(dnn, 'train_epoch_%d.pkl' % epoch)
+            save_model(dnn, 'train_dnn_%d.pkl' % epoch)
         elif opt.dataset == "all":
-            save_model(dnn, 'all_epoch_%d.pkl' % epoch)
+            save_model(dnn, 'all_dnn_%d.pkl' % epoch)
         else:
             print("dataset error")
             

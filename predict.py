@@ -1,4 +1,4 @@
-from action import train_with_dnn, train_svm, train_xgboost
+from action import predict_dnn, predict_svm, predict_xgboost
 import argparse
 
 if __name__ == "__main__":
@@ -11,7 +11,7 @@ if __name__ == "__main__":
                     help='CUDA training')
     parser.add_argument('--model', type=str, default="dnn",
                     help='Choose model (dnn=0,svm=1,xgboost=2)')                           
-    parser.add_argument('--model_param', type=str, default='train_dnn_30.pkl',
+    parser.add_argument('--model_param', type=str, default='train_epoch_30.pkl',
                     help='model name')
     parser.add_argument('--team_data_type', type=str, default='average',
                     help='team data type')
@@ -26,5 +26,3 @@ if __name__ == "__main__":
         predict_svm(args)
     elif args.model == "xgboost":
         predict_xgboost(args)
-
-    
