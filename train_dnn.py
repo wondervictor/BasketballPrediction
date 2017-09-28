@@ -24,12 +24,12 @@ LEARNING_RATE = 0.0001
 
 
 def save_model(net, name):
-    path = 'model/'
+    path = 'model_params/'
     torch.save(net, path+name)
 
 
 def load_model(name):
-    path = 'model/'
+    path = 'model_params/'
     return torch.load(path+name)
 
 
