@@ -15,6 +15,7 @@ import os
 import numpy as np
 import torch.optim as optimizer
 import random
+from evaluate import auc
 
 
 CURRENT_COMP_VECTOR_SIZE = 2
@@ -237,7 +238,8 @@ def test(team_data, opt):
 
     correct = 0
     wrong = 0
-
+    y_label = []
+    y_pred = []
     for i in range(len(testing_data)):
 
         away_id = testing_data[i][0]
@@ -260,6 +262,10 @@ def test(team_data, opt):
         )
 
         pred_win = np.argmax(prob.data.cpu().numpy())
+        
+        y_label.append(result)
+        y_pred.append(prob.data.cpu().numpy()[1])
+
 
         if pred_win == result:
             correct += 1
@@ -270,6 +276,9 @@ def test(team_data, opt):
 
         print(line)
         log_file.write(line+'\n')
+    auc_score = auc(y_label, y_pred)
+    print("auc score: %s" % auc_score)
+    log_file.write("auc score:" + auc_score)
     log_file.close()
 
     print("Wrong: %s Correct: %s" % (wrong, correct))
