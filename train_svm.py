@@ -38,7 +38,7 @@ def train(team_raw_data, opt):
 
 
 def test(team_raw_data):
-    __test_data = test_data()
+    __test_data = test_data_func()
     svm_model = svm.load_model('svm_model_params.pkl')
     log_file = open('log/svm.log', 'w+')
     correct = 0

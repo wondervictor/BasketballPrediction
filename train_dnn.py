@@ -241,7 +241,7 @@ def test(team_data, opt):
     data_provider.roll_data()
 
     #testing_data = data_provider.get_test_data()
-    testing_data = test_data()
+    testing_data = test_data_func()
 
     log_file = open('testing.log', 'w+')
 

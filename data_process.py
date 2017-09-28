@@ -6,8 +6,37 @@ import numpy as np
 __all__ = ['MatchData']
 
 
-def remove_duplicate(data):
-    pass
+def train_data_func():
+    with open('data/train.csv', 'r') as openfile:
+        lines = openfile.readlines()
+    i = 0
+    data = []
+    for line in lines[1:]:
+        data.append(map(int, line.split(',')))
+        data[i][2] = -data[i][2]
+        data[i][5] = -data[i][5]
+        data[i][6] = -data[i][6]
+        i += 1
+    random.shuffle(data)
+    return data
+
+
+def test_data_func():
+    with open('data/test.csv', 'r') as openfile:
+        lines = openfile.readlines()
+
+    data = []
+    i = 0
+    for line in lines[1:]:
+        data.append(map(int, line.split(',')))
+        data[i][2] = -data[i][2]
+        data[i][5] = -data[i][5]
+        data[i][6] = -data[i][6]
+        i += 1
+    random.shuffle(data)
+    print(data[0])
+    return data
+
 
 
 def load_team_data():
@@ -74,7 +103,7 @@ def tmp_load():
     i = 0
 
     data = []
-    with open('./matchDataTest.csv') as open_file:
+    with open('./data/matchDataTest.csv') as open_file:
         lines = open_file.readlines()
 
     def get_record(rec_str):
@@ -85,7 +114,7 @@ def tmp_load():
         return records
 
     for line in lines[1:]:
-        temp =[]
+        temp = []
         temp.append(i)
         i += 1
         elements = line.split(',')
@@ -195,42 +224,6 @@ def test_team_data():
     s = TeamData()
     s.process()
 
-
-def train_data_func():
-    with open('data/train.csv', 'r') as openfile:
-        lines = openfile.readlines()
-    i = 0
-    data = []
-    for line in lines[1:]:
-        data.append(map(int, line.split(',')))
-        data[i][2] = -data[i][2]
-        data[i][5] = -data[i][5]
-        data[i][6] = -data[i][6]
-        i += 1
-    random.shuffle(data)
-    return data
-
-
-def test_data_func():
-    with open('data/test.csv', 'r') as openfile:
-        lines = openfile.readlines()
-
-    data = []
-    i = 0
-    for line in lines[1:]:
-        data.append(map(int, line.split(',')))
-        data[i][2] = -data[i][2]
-        data[i][5] = -data[i][5]
-        data[i][6] = -data[i][6]
-        i += 1
-    random.shuffle(data)
-    print(data[0])
-    return data
-
-#
-# if __name__ == '__main__':
-#
-#     test_match_data()
 
 
 

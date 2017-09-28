@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 
-from data_process import test_data_func, train_data_func
+from data_process import test_data_func, train_data_func, tmp_load
 import numpy as np
 import models.boost as boost
+from evaluate import auc
 
 
 def train(team_raw_data, opt):
@@ -22,21 +23,21 @@ def train(team_raw_data, opt):
 
         away_state = x[2:4]
         home_state = x[4:6]
-
         input_vector = home_vector.tolist() + home_state + away_vector.tolist() + away_state
 
         train_x.append(input_vector)
         train_y.append(x[-1])
 
-    __boost.train(train_x, train_x)
+    __boost.train(train_x, train_y)
     __boost.save_model()
 
 
 def test(team_raw_data):
-    train_x = []
+    test_x = []
     y = []
     train_data = train_data_func()
     __boost = boost.Boost()
+    __boost.load_model()
     for x in train_data:
         home = x[1]
         away = x[0]
@@ -47,11 +48,48 @@ def test(team_raw_data):
         home_state = x[4:6]
 
         input_vector = home_vector.tolist() + home_state + away_vector.tolist() + away_state
-
-        train_x.append(input_vector)
-
         y.append(x[-1])
-        __boost.predict(train_x)
+        test_x.append(input_vector)
+    pred_y = __boost.predict(test_x)
+    print(auc(y, pred_y))
+
+    with open('log/xgboost_test.log', 'w+') as f:
+        for i in range(len(pred_y)):
+            f.write('%s,%s' % (y[i], pred_y[i]))
+            f.write('\n')
+
+def predict(team_raw_data):
+
+    testing_data = tmp_load()
+    output_file = open('output/predictPro.csv', 'w+')
+    output_file.write('主场赢得比赛的置信度\n')
+
+    __boost = boost.Boost()
+    __boost.load_model()
+    testing_input = []
+    for x in testing_data:
+        home = x[1]
+        away = x[0]
+        home_vector = team_raw_data[home]
+        away_vector = team_raw_data[away]
+
+        away_state = x[2:4]
+        home_state = x[4:6]
+
+        input_vector = home_vector.tolist() + home_state + away_vector.tolist() + away_state
+        testing_input.append(input_vector)
+
+    pred = __boost.predict(testing_input)
+    for prob in pred:
+        line = '%s\n' % prob
+        output_file.write(line)
+
+    output_file.close()
+
+
+
+
+
 
 
 

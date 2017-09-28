@@ -68,7 +68,7 @@ def test_xgboost(opt):
 
 def predict_xgboost(opt):
     team_data = get_team_representations(opt.team_data_type)
-    xgboost.test(team_data)
+    xgboost.predict(team_data)
 
 
 
