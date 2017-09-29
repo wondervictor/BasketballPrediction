@@ -10,7 +10,7 @@ from torch.autograd import Variable
 import torch.nn.functional as F
 from data_process import MatchData, tmp_load
 from data_process import test_data_func, train_data_func
-from models.dnn import DNN
+from models.dnn import DNN, SimDNN
 import os
 import numpy as np
 import torch.optim as optimizer
@@ -19,7 +19,7 @@ from evaluate import auc
 
 
 CURRENT_COMP_VECTOR_SIZE = 2
-TEAM_VECTOR_SIZE = 21
+TEAM_VECTOR_SIZE = 12
 LEARNING_RATE = 0.0001
 
 
@@ -29,7 +29,7 @@ def save_model(net, name):
 
 
 def load_model(name):
-    path = 'model_params/'
+    path = 'model_para/'
     return torch.load(path+name)
 
 
@@ -72,7 +72,7 @@ def train_dnn_batch(epoches, team_data, opt):
     """
 
     batch_size = opt.batch_size
-    dnn = DNN()
+    dnn = SimDNN(TEAM_VECTOR_SIZE)
     if opt.cuda == 1:
         dnn.cuda()
     data_provider = MatchData(1000)
@@ -121,11 +121,11 @@ def train_dnn_batch(epoches, team_data, opt):
                 batch_result = batch_result.cuda()
                 batch_score = batch_score.cuda()
 
-            output_prob, output_score = dnn.forward(
-                home_current_comp_vector=batch_home_current_state,
-                home_team_vector=batch_home_vector,
-                away_current_comp_vector=batch_away_current_state,
-                away_team_vector=batch_away_vector,
+            output_prob = dnn.forward(
+                home_vector=batch_home_vector,
+                home_state=batch_home_current_state,
+                away_vector=batch_away_vector,
+                away_state=batch_away_current_state
             )
             loss = prob_criterion(output_prob, batch_result)
             #loss += 0.001*score_criterion(output_score, batch_score)
@@ -146,7 +146,7 @@ def train_dnn(epoches, team_data, opt):
     :rtype: 
     """
     LEARNING_RATE = 0.0001
-    dnn = DNN()
+    dnn = SimDNN(TEAM_VECTOR_SIZE)
     if opt.cuda == 1:
         dnn.cuda()
     #data_provider = MatchData(1000)
@@ -206,11 +206,11 @@ def train_dnn(epoches, team_data, opt):
             home_vector = home_vector.unsqueeze(0)
             away_vector = away_vector.unsqueeze(0)
 
-            output_prob, output_score = dnn.forward(
-                home_current_comp_vector=home_current_state,
-                home_team_vector=home_vector,
-                away_current_comp_vector=away_current_state,
-                away_team_vector=away_vector,
+            output_prob = dnn.forward(
+                home_vector=home_vector,
+                home_state=home_current_state,
+                away_vector=away_vector,
+                away_state=away_current_state
             )
 
             loss = prob_criterion(output_prob, prob)

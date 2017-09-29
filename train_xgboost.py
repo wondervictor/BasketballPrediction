@@ -55,11 +55,11 @@ def test(team_raw_data):
     acc(y, pred_y)
     print("AUC:%s" % auc_)
 
-
     with open('log/xgboost_test.log', 'w+') as f:
         for i in range(len(pred_y)):
             f.write('%s,%s' % (y[i], pred_y[i]))
             f.write('\n')
+
 
 def predict(team_raw_data):
 

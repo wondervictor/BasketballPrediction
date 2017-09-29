@@ -78,13 +78,15 @@ def team_representations(team_raw_data, type):
             priority_team_data = []
             for i in range(k):
                 s = priority_queue.get()
-                priority_team_data.append(np.array(s[-1]))
-            return np.array(priority_team_data)
+                priority_team_data.append(s[-1])
+            return priority_team_data
 
         def retrieve_essentials(member):
             member[18] = -member[18]
             member[19] = -member[19]
-            return [member[3], member[6],member[9]] + member[12:]
+            result = [member[3], member[6], member[9]]
+            result.extend(member[12:])
+            return np.array(result)
 
         for key in team_raw_data.keys():
 
