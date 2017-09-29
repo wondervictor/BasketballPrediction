@@ -36,12 +36,17 @@ def team_representations(team_raw_data, type):
             team_vector = team_vector/len(team)
             team_data[key] = team_vector
     elif type == "rank_8":
+        def retrieve_essentials(member):
+            member[18] = -member[18]
+            member[19] = -member[19]
+            return member[2:]
+
         for key in team_raw_data.keys():
             team = team_raw_data[key]
             team = get_top_k(8, team)
-            team_vector = team[0][2:]
+            team_vector = retrieve_essentials(team[0])
             for i in range(1, 8):
-                team_vector += team[i][2:]
+                team_vector += retrieve_essentials(team[i])
             team_vector = team_vector/8
             team_data[key] = team_vector
     elif type == "pca":
