@@ -11,7 +11,7 @@ if __name__ == "__main__":
                     help='CUDA training')
     parser.add_argument('--model', type=str, default="dnn",
                     help='Choose model (dnn=0,svm=1,xgboost=2)')                           
-    parser.add_argument('--model_param', type=str, default='epoch_30_params.pkl',
+    parser.add_argument('--model_name', type=str, default='epoch_30_params.pkl',
                     help='model name')
     parser.add_argument('--team_data_type', type=str, default='average',
                     help='team data type')

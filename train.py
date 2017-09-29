@@ -1,3 +1,4 @@
+import torch
 from action import train_with_dnn, train_svm, train_xgboost
 import argparse
 
@@ -11,7 +12,7 @@ if __name__ == "__main__":
                     help='CUDA training')
     parser.add_argument('--model', type=str, default="dnn",
                     help='Choose model')
-    parser.add_argument('--model_param', type=str, default='train_epoch_30.pkl',
+    parser.add_argument('--model_name', type=str, default='train_epoch_30.pkl',
                     help='model name')
     parser.add_argument('--team_data_type', type=str, default='average',
                     help='team data type')

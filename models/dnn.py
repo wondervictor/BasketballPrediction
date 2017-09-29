@@ -76,10 +76,10 @@ class SimDNN(nn.Module):
         self.input_away_state = nn.Linear(2, 8)
         self.home_layer = nn.Linear(72, 128)
         self.away_layer = nn.Linear(72, 128)
-
+        self.dropout = nn.Dropout(0.3)
         self.comp_layer_1 = nn.Linear(256, 256)
-        self.comp_layer_2 = nn.Linear(256, 128)
-        self.comp_layer_3 = nn.Linear(128, 128)
+        self.comp_layer_2 = nn.Linear(256, 256)
+        self.comp_layer_3 = nn.Linear(256, 128)
         self.comp_layer_4 = nn.Linear(128, 64)
         self.out_prob = nn.Linear(64, 2)
 
@@ -111,7 +111,9 @@ class SimDNN(nn.Module):
 
         competition_round = F.tanh(self.comp_layer_1(torch.cat([home_representation, away_representation], dim=1)))
         competition_round = F.leaky_relu(self.comp_layer_2(competition_round), negative_slope=-0.5)
+        competition_round = self.dropout(competition_round)
         competition_round = F.leaky_relu(self.comp_layer_3(competition_round), negative_slope=-0.5)
+        competition_round = self.dropout(competition_round)
         competition_round = F.leaky_relu(self.comp_layer_4(competition_round), negative_slope=-0.5)
 
         output_prob = F.softmax(
