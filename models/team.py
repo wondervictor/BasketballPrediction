@@ -15,6 +15,18 @@ def team_representations(team_raw_data, type):
     """
     team_data = dict()
     # Average
+
+    def get_top_k(k, team):
+        priority_queue = Queue.PriorityQueue()
+        for i in range(len(team)):
+            member = team[i]
+            priority_queue.put((-(member[0] + member[1] + 0.01 * i), member))
+        priority_team_data = []
+        for i in range(k):
+            s = priority_queue.get()
+            priority_team_data.append(s[-1])
+        return priority_team_data
+
     if type == "average":
         for key in team_raw_data.keys():
             team = team_raw_data[key]
@@ -26,9 +38,10 @@ def team_representations(team_raw_data, type):
     elif type == "rank_8":
         for key in team_raw_data.keys():
             team = team_raw_data[key]
-            team_vector = team[0]
+            team = get_top_k(8, team)
+            team_vector = team[0][2:]
             for i in range(1, 8):
-                team_vector += team[i]
+                team_vector += team[i][2:]
             team_vector = team_vector/8
             team_data[key] = team_vector
     elif type == "pca":
@@ -69,17 +82,6 @@ def team_representations(team_raw_data, type):
         """
 
         weights = [0.14, 0.14, 0.14, 0.14, 0.14, 0.1, 0.1, 0.1]
-
-        def get_top_k(k, team):
-            priority_queue = Queue.PriorityQueue()
-            for i in range(len(team)):
-                member = team[i]
-                priority_queue.put((-(member[0]+member[1] + 0.01 * i), member))
-            priority_team_data = []
-            for i in range(k):
-                s = priority_queue.get()
-                priority_team_data.append(s[-1])
-            return priority_team_data
 
         def retrieve_essentials(member):
             member[18] = -member[18]

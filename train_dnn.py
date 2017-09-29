@@ -19,7 +19,7 @@ from evaluate import auc
 
 
 CURRENT_COMP_VECTOR_SIZE = 2
-TEAM_VECTOR_SIZE = 12
+TEAM_VECTOR_SIZE = 19
 LEARNING_RATE = 0.0001
 
 
@@ -54,7 +54,7 @@ def predict(model_name, home_vector, away_vector, home_state, away_state, opt):
     home_vector = home_vector.unsqueeze(0)
     away_vector = away_vector.unsqueeze(0)
 
-    prob= net(
+    prob = net(
         home_state=home_current_state,
         home_vector=home_vector,
         away_state=away_current_state,
@@ -72,7 +72,7 @@ def train_dnn_batch(epoches, team_data, opt):
     """
 
     batch_size = opt.batch_size
-    dnn = SimDNN(TEAM_VECTOR_SIZE)
+    dnn = DNN()
     if opt.cuda == 1:
         dnn.cuda()
     data_provider = MatchData(1000)
@@ -146,23 +146,21 @@ def train_dnn(epoches, team_data, opt):
     :rtype: 
     """
     LEARNING_RATE = 0.0001
-    dnn = SimDNN(TEAM_VECTOR_SIZE)
+    dnn = DNN()#SimDNN(TEAM_VECTOR_SIZE)
     if opt.cuda == 1:
         dnn.cuda()
     #data_provider = MatchData(1000)
     dnn_optimizer = optimizer.Adamax(dnn.parameters(), lr=LEARNING_RATE)
     prob_criterion = torch.nn.CrossEntropyLoss()
     score_criterion = torch.nn.MSELoss()
+    train_data = train_data_func()
+    if opt.dataset == "all":
+        test_data = test_data_func()
+        train_data += test_data
 
     print("Starting to train with DNN")
     for epoch in range(epoches):
-        #data_provider.roll_data()
-        #train_data = data_provider.get_train_data()
-        train_data = train_data_func()
-        if opt.dataset == "all":
-            test_data = test_data_func()
-            train_data += test_data
-            
+        random.shuffle(train_data)
         if epoch == 35:
             LEARNING_RATE = LEARNING_RATE/5.0
             for param_group in dnn_optimizer.param_groups:
@@ -236,7 +234,6 @@ def train_dnn(epoches, team_data, opt):
             save_model(dnn, 'all_dnn_%d.pkl' % epoch)
         else:
             print("dataset error")
-            
 
 
 def test(team_data, opt):

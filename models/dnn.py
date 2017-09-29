@@ -3,7 +3,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 CURRENT_COMP_VECTOR_SIZE = 2
-TEAM_VECTOR_SIZE = 21
+TEAM_VECTOR_SIZE = 19
 
 
 class DNN(nn.Module):
@@ -18,32 +18,32 @@ class DNN(nn.Module):
         self.comp_layer_2 = nn.Linear(512, 256)
         self.comp_layer_3 = nn.Linear(256, 256)
         self.comp_layer_4 = nn.Linear(256, 128)
-
+        self.dropout = nn.Dropout(0.3)
         self.out_prob = nn.Linear(128, 2)
 
         self.out_score = nn.Linear(128, 2)
 
-    def forward(self, home_team_vector, away_team_vector, home_current_comp_vector, away_current_comp_vector):
+    def forward(self, home_vector, away_vector, home_state, away_state):
         """
         
-        :param home_team_vector: Home Team Representation by team members
-        :type home_team_vector: Tensor [1x1024]
-        :param away_team_vector: Away Team Representation by team members
-        :type away_team_vector: Tensor [1x1024]
-        :param home_current_comp_vector: Current Competition State Info for Home Team
-        :type home_current_comp_vector: Tensor [1x8]
-        :param away_current_comp_vector: Current Competition State Info for Away Team
-        :type away_current_comp_vector: Tensor [1x8]
-        :return: output_probability output_score
+        :param home_vector: 
+        :type home_vector: 
+        :param away_vector: 
+        :type away_vector: 
+        :param home_state: 
+        :type home_state: 
+        :param away_state: 
+        :type away_state: 
+        :return: 
         :rtype: 
         """
         home_representation = F.leaky_relu(
-            self.input_team_home_layer(torch.cat([home_team_vector, home_current_comp_vector], dim=1)),
+            self.input_team_home_layer(torch.cat([home_vector, home_state], dim=1)),
             negative_slope=-0.1
         )
 
         away_representation = F.leaky_relu(
-            self.input_team_away_layer(torch.cat([away_team_vector, away_current_comp_vector], dim=1)),
+            self.input_team_away_layer(torch.cat([away_vector, away_state], dim=1)),
             negative_slope=-0.1
         )
 
@@ -57,13 +57,15 @@ class DNN(nn.Module):
 
         competition_round = F.relu(self.comp_layer_1(torch.cat([home_ready, away_ready], dim=1)))
         competition_round = F.leaky_relu(self.comp_layer_2(competition_round), negative_slope=-0.5)
+        competition_round = self.dropout(competition_round)
         competition_round = F.leaky_relu(self.comp_layer_3(competition_round), negative_slope=-0.5)
+        competition_round = self.dropout(competition_round)
         competition_round = F.leaky_relu(self.comp_layer_4(competition_round), negative_slope=-0.5)
 
         output_prob = F.softmax(self.out_prob(competition_round))
         output_score = self.out_score(competition_round)
 
-        return output_prob, output_score
+        return output_prob
 
 
 class SimDNN(nn.Module):
