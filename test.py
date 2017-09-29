@@ -18,8 +18,6 @@ if __name__ == "__main__":
     args = parser.parse_args()
     if args.model == "dnn":
         test_with_dnn(args)
-    elif args.model == "dnn":
-        pass
     elif args.model == "svm":
         test_svm(args)
     elif args.model == "xgboost":

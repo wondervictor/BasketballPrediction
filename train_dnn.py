@@ -29,7 +29,7 @@ def save_model(net, name):
 
 
 def load_model(name):
-    path = 'model_para/'
+    path = 'model_params/'
     return torch.load(path+name)
 
 
@@ -54,11 +54,11 @@ def predict(model_name, home_vector, away_vector, home_state, away_state, opt):
     home_vector = home_vector.unsqueeze(0)
     away_vector = away_vector.unsqueeze(0)
 
-    prob, _ = net(
-        home_current_comp_vector=home_current_state,
-        home_team_vector=home_vector,
-        away_current_comp_vector=away_current_state,
-        away_team_vector=away_vector,
+    prob= net(
+        home_state=home_current_state,
+        home_vector=home_vector,
+        away_state=away_current_state,
+        away_vector=away_vector
     )
     prob = prob.squeeze(0)
     return prob
@@ -227,8 +227,11 @@ def train_dnn(epoches, team_data, opt):
 
             if i % 100 == 0:
                 print("Epoches: %s Sample: %s Loss: %s" % (epoch, i+1, loss.data[0]))
+
         if opt.dataset == "train":
             save_model(dnn, 'train_dnn_%d.pkl' % epoch)
+            opt.model_param = 'train_dnn_%d.pkl' % epoch
+            test(team_data, opt)
         elif opt.dataset == "all":
             save_model(dnn, 'all_dnn_%d.pkl' % epoch)
         else:
@@ -262,7 +265,7 @@ def test(team_data, opt):
         result = [testing_data[i][8]]
 
         prob = predict(
-            opt.model_name,
+            opt.model_param,
             home_state=home_current_state,
             home_vector=home_vector,
             away_state=away_current_state,
@@ -276,19 +279,18 @@ def test(team_data, opt):
         y_pred.append(prob.data.cpu().numpy()[1])
 
 
-        if pred_win == result:
-            correct += 1
-            line = 'Test: %s Correct! Confidence=%s' % (i, prob.data[pred_win])
-        else:
-            wrong += 1
-            line = 'Test: %s Wrong! Confidence=%s' % (i, prob.data.cpu().numpy().tolist())
+        # if pred_win == result:
+        #     correct += 1
+        #     line = 'Test: %s Correct! Confidence=%s' % (i, prob.data[pred_win])
+        # else:
+        #     wrong += 1
+        #     line = 'Test: %s Wrong! Confidence=%s' % (i, prob.data.cpu().numpy().tolist())
 
-        print(line)
-        log_file.write(line+'\n')
+        # print(line)
+        # log_file.write(line+'\n')
     auc_score = auc(y_label, y_pred)
-    print("auc score: %s" % auc_score)
-    log_file.write("auc score:" + auc_score)
-    log_file.close()
+    print("TEST: auc score: %s" % auc_score)
+    # log_file.close()
 
     print("Wrong: %s Correct: %s" % (wrong, correct))
 
