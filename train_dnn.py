@@ -262,7 +262,7 @@ def test(team_data, opt):
         result = [testing_data[i][8]]
 
         prob = predict(
-            opt.model_param,
+            opt.model_name,
             home_state=home_current_state,
             home_vector=home_vector,
             away_state=away_current_state,
