@@ -19,8 +19,8 @@ from evaluate import auc
 
 
 CURRENT_COMP_VECTOR_SIZE = 2
-TEAM_VECTOR_SIZE = 14
-LEARNING_RATE = 0.00001
+TEAM_VECTOR_SIZE = 19
+LEARNING_RATE = 0.0001
 
 
 def save_model(net, name):
@@ -123,11 +123,12 @@ def train_dnn_batch(epoches, team_data, opt):
                 batch_score[p] = Variable(torch.FloatTensor(score))
                 batch_result.append(result)
             batch_result = Variable(torch.LongTensor(batch_result))
+
             if opt.cuda == 1:
                 batch_home_current_state = batch_home_current_state.cuda()
                 batch_away_current_state = batch_home_current_state.cuda()
-                batch_home_vector = batch_home_current_state.cuda()
-                batch_away_vector = batch_home_current_state.cuda()
+                batch_home_vector = batch_home_vector.cuda()
+                batch_away_vector = batch_away_vector.cuda()
                 batch_result = batch_result.cuda()
                 batch_score = batch_score.cuda()
 

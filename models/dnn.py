@@ -3,7 +3,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 CURRENT_COMP_VECTOR_SIZE = 2
-TEAM_VECTOR_SIZE = 14
+TEAM_VECTOR_SIZE = 19
 
 
 class DNN(nn.Module):
@@ -37,7 +37,7 @@ class DNN(nn.Module):
         :return: 
         :rtype: 
         """
-        print(home_vector.shape, home_state.shape)
+
         home_representation = F.leaky_relu(
             self.input_team_home_layer(torch.cat([home_vector, home_state], dim=1)),
             negative_slope=-0.1
@@ -73,13 +73,13 @@ class SimDNN(nn.Module):
 
     def __init__(self, input_size):
         super(SimDNN, self).__init__()
-        self.input_home_vector = nn.Linear(input_size, 32)
-        self.input_away_vector = nn.Linear(input_size, 32)
+        self.input_home_vector = nn.Linear(input_size, 120)
+        self.input_away_vector = nn.Linear(input_size, 120)
         self.input_home_state = nn.Linear(2, 8)
         self.input_away_state = nn.Linear(2, 8)
-        self.home_layer = nn.Linear(40, 128)
-        self.away_layer = nn.Linear(40, 128)
-        self.comp_layer_1 = nn.Linear(256, 512)
+        self.home_layer = nn.Linear(128, 256)
+        self.away_layer = nn.Linear(128, 256)
+        self.comp_layer_1 = nn.Linear(512, 512)
         self.comp_layer_2 = nn.Linear(512, 256)
         self.comp_layer_3 = nn.Linear(256, 128)
         self.comp_layer_5 = nn.Linear(128, 64)
