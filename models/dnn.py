@@ -3,7 +3,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 CURRENT_COMP_VECTOR_SIZE = 2
-TEAM_VECTOR_SIZE = 19
+TEAM_VECTOR_SIZE = 14
 
 
 class DNN(nn.Module):
@@ -20,7 +20,6 @@ class DNN(nn.Module):
         self.comp_layer_4 = nn.Linear(256, 128)
         self.dropout = nn.Dropout(0.2)
         self.out_prob = nn.Linear(128, 2)
-
         self.out_score = nn.Linear(128, 2)
 
     def forward(self, home_vector, away_vector, home_state, away_state):

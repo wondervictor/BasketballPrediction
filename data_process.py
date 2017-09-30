@@ -37,7 +37,6 @@ def test_data_func():
     return data
 
 
-
 def load_team_data():
 
     team_data = []

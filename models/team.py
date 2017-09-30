@@ -114,12 +114,12 @@ def reduce_(team_raw_data, topk=-1):
             team = get_top_k(topk, team)
         show_time = 0.0
         times = []
-        for i in range(0, len(team)):
-            show_time += team[i][2]
-            times.append(team[i][2])
-        team_vector = times[0]/show_time*extract_essentials(team[0])
+        # for i in range(0, len(team)):
+        #     show_time += team[i][2]
+        #     times.append(team[i][2])
+        team_vector = extract_essentials(team[0]) #times[0]/show_time*
         for i in range(1, len(team)):
-            team_vector += extract_essentials(team[i])*times[0]/show_time
+            team_vector += extract_essentials(team[i])#*times[0]/show_time
         team_data[key] = team_vector
     return team_data
 

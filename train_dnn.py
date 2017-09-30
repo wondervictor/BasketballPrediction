@@ -19,7 +19,7 @@ from evaluate import auc
 
 
 CURRENT_COMP_VECTOR_SIZE = 2
-TEAM_VECTOR_SIZE = 19
+TEAM_VECTOR_SIZE = 14
 LEARNING_RATE = 0.0001
 
 
@@ -77,7 +77,7 @@ def train_dnn_batch(epoches, team_data, opt):
     if opt.cuda == 1:
         dnn.cuda()
     #data_provider = MatchData(1000)
-    dnn_optimizer = optimizer.Adam(dnn.parameters(), lr=LEARNING_RATE)
+    dnn_optimizer = optimizer.RMSprop(dnn.parameters(), lr=LEARNING_RATE)
     prob_criterion = torch.nn.CrossEntropyLoss()
     score_criterion = torch.nn.MSELoss()
     train_data = train_data_func()
@@ -156,7 +156,6 @@ def train_dnn_batch(epoches, team_data, opt):
             save_model(dnn, 'all_dnn_%d.pkl' % epoch)
         else:
             print("dataset error")
-
 
 
 def train_dnn(epoches, team_data, opt):
