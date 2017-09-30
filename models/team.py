@@ -41,10 +41,13 @@ def get_top_k(k, team):
     :return: 
     :rtype: 
     """
+    #def rank(member):
+
+
     priority_queue = Queue.PriorityQueue()
     for i in range(len(team)):
         member = team[i]
-        priority_queue.put((-(member[0] + 0.01 * i), member))
+        priority_queue.put((-(member[20] + 0.001 * i), member))
     priority_team_data = []
     for i in range(k):
         s = priority_queue.get()
@@ -70,12 +73,12 @@ def average(team_raw_data, topk=-1):
             team = get_top_k(topk, team)
         show_time = 0.0
         times = []
-        for i in range(0, len(team)):
-            show_time += team[i][2]
-            times.append(team[i][2])
-        team_vector = times[0]/show_time*member_process(team[0])
+        # for i in range(0, len(team)):
+        #     show_time += team[i][2]
+        #     times.append(team[i][2])
+        team_vector = member_process(team[0]) # times[0]/show_time*
         for i in range(1, len(team)):
-            team_vector += member_process(team[i])*times[0]/show_time
+            team_vector += member_process(team[i])#*times[0]/show_time
         team_data[key] = team_vector
     return team_data
 
