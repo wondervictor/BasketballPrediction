@@ -1,6 +1,9 @@
 import torch
-from action import train_with_dnn, train_svm, train_xgboost
+from action import train_with_dnn, train_svm #train_xgboost
 import argparse
+
+def train_xgboost(a):
+    pass
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='basketball game prediction')
