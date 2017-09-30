@@ -13,7 +13,7 @@ class Boost(object):
             'scale_pos_weight': 1,
             'eval_metric': 'auc',
             'gamma': 0.2,
-            'max_depth': 10,
+            'max_depth': 15,
             'lambda ': 100,
             'subsample': 1,
             'colsample_bytree': 0.5,

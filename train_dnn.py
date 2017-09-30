@@ -19,8 +19,8 @@ from evaluate import auc
 
 
 CURRENT_COMP_VECTOR_SIZE = 2
-TEAM_VECTOR_SIZE = 19
-LEARNING_RATE = 0.0001
+TEAM_VECTOR_SIZE = 14
+LEARNING_RATE = 0.00001
 
 
 def save_model(net, name):
@@ -72,20 +72,30 @@ def train_dnn_batch(epoches, team_data, opt):
     """
 
     batch_size = opt.batch_size
-    dnn = DNN()
+    LEARNING_RATE = 0.0001
+    dnn = SimDNN(TEAM_VECTOR_SIZE)
     if opt.cuda == 1:
         dnn.cuda()
-    data_provider = MatchData(1000)
-    dnn_optimizer = optimizer.Adamax(dnn.parameters(), lr=0.001)
+    #data_provider = MatchData(1000)
+    dnn_optimizer = optimizer.Adam(dnn.parameters(), lr=LEARNING_RATE)
     prob_criterion = torch.nn.CrossEntropyLoss()
     score_criterion = torch.nn.MSELoss()
-
+    train_data = train_data_func()
+    if opt.dataset == "all":
+        test_data = test_data_func()
+        train_data += test_data
     print("Starting to train with DNN")
     for epoch in range(epoches):
-        data_provider.roll_data()
-        train_data = data_provider.get_train_data()
-
-        for i in range(0, len(train_data), batch_size):
+        random.shuffle(train_data)
+        if epoch == 35:
+            LEARNING_RATE = LEARNING_RATE / 5.0
+            for param_group in dnn_optimizer.param_groups:
+                param_group['lr'] = LEARNING_RATE
+        if epoch == 100:
+            LEARNING_RATE = LEARNING_RATE / 10.0
+            for param_group in dnn_optimizer.param_groups:
+                param_group['lr'] = LEARNING_RATE
+        for i in range(0, len(train_data)-batch_size, batch_size):
             batch_home_current_state = Variable(torch.zeros((batch_size, CURRENT_COMP_VECTOR_SIZE)))
             batch_away_current_state = Variable(torch.zeros((batch_size, CURRENT_COMP_VECTOR_SIZE)))
 
@@ -133,9 +143,18 @@ def train_dnn_batch(epoches, team_data, opt):
             dnn_optimizer.zero_grad()
             loss.backward()
             dnn_optimizer.step()
-            if i % 10 == 0:
-                print("Batch: %s Loss: %s" % (i+1, loss.data[0]))
-        save_model(dnn, 'epoch_%d_params.pkl' % epoch)
+
+            if i % 100 == 0:
+                print("Epoches: %s Sample: %s Loss: %s" % (epoch, i + 1, loss.data[0]))
+
+        if opt.dataset == "train":
+            save_model(dnn, 'train_dnn_%d.pkl' % epoch)
+            opt.model_name = 'train_dnn_%d.pkl' % epoch
+            test(team_data, opt)
+        elif opt.dataset == "all":
+            save_model(dnn, 'all_dnn_%d.pkl' % epoch)
+        else:
+            print("dataset error")
 
 
 
@@ -146,11 +165,11 @@ def train_dnn(epoches, team_data, opt):
     :rtype: 
     """
     LEARNING_RATE = 0.0001
-    dnn = DNN()#SimDNN(TEAM_VECTOR_SIZE)
+    dnn = SimDNN(TEAM_VECTOR_SIZE)
     if opt.cuda == 1:
         dnn.cuda()
     #data_provider = MatchData(1000)
-    dnn_optimizer = optimizer.Adamax(dnn.parameters(), lr=LEARNING_RATE)
+    dnn_optimizer = optimizer.RMSprop(dnn.parameters(), lr=LEARNING_RATE)
     prob_criterion = torch.nn.CrossEntropyLoss()
     score_criterion = torch.nn.MSELoss()
     train_data = train_data_func()
@@ -228,7 +247,7 @@ def train_dnn(epoches, team_data, opt):
 
         if opt.dataset == "train":
             save_model(dnn, 'train_dnn_%d.pkl' % epoch)
-            opt.model_param = 'train_dnn_%d.pkl' % epoch
+            opt.model_name = 'train_dnn_%d.pkl' % epoch
             test(team_data, opt)
         elif opt.dataset == "all":
             save_model(dnn, 'all_dnn_%d.pkl' % epoch)
@@ -276,12 +295,12 @@ def test(team_data, opt):
         y_pred.append(prob.data.cpu().numpy()[1])
 
 
-        # if pred_win == result:
-        #     correct += 1
-        #     line = 'Test: %s Correct! Confidence=%s' % (i, prob.data[pred_win])
-        # else:
-        #     wrong += 1
-        #     line = 'Test: %s Wrong! Confidence=%s' % (i, prob.data.cpu().numpy().tolist())
+        if pred_win == result:
+            correct += 1
+            #line = 'Test: %s Correct! Confidence=%s' % (i, prob.data[pred_win])
+        else:
+            wrong += 1
+            #line = 'Test: %s Wrong! Confidence=%s' % (i, prob.data.cpu().numpy().tolist())
 
         # print(line)
         # log_file.write(line+'\n')

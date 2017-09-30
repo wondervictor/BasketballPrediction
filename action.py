@@ -30,7 +30,7 @@ def get_team_representations(type):
 def train_with_dnn(opt):
     print(opt.batch_size)
     team_data = get_team_representations(opt.team_data_type)
-    train_dnn.train_dnn(opt.epoch, team_data, opt)
+    train_dnn.train_dnn_batch(opt.epoch, team_data, opt)
 
 
 def test_with_dnn(opt):
@@ -69,6 +69,19 @@ def test_xgboost(opt):
 def predict_xgboost(opt):
     team_data = get_team_representations(opt.team_data_type)
     xgboost.predict(team_data)
+
+
+def __test_team__():
+
+    team_data = dp.TeamData()
+    team_data.process()
+    team_raw_data = team_data.get_team()
+
+    team.average({1:team_raw_data[1], 2:team_raw_data[2]}, 10)
+
+# if __name__ == '__main__':
+#
+#     __test_team__()
 
 
 

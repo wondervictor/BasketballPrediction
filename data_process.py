@@ -34,7 +34,6 @@ def test_data_func():
         data[i][6] = -data[i][6]
         i += 1
     random.shuffle(data)
-    print(data[0])
     return data
 
 
