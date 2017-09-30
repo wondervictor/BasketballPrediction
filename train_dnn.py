@@ -73,7 +73,7 @@ def train_dnn_batch(epoches, team_data, opt):
 
     batch_size = opt.batch_size
     LEARNING_RATE = 0.0001
-    dnn = DNN()
+    dnn = SimDNN(TEAM_VECTOR_SIZE)
     if opt.cuda == 1:
         dnn.cuda()
     #data_provider = MatchData(1000)

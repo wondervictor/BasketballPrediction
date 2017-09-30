@@ -18,7 +18,6 @@ class DNN(nn.Module):
         self.comp_layer_2 = nn.Linear(256, 512)
         self.comp_layer_3 = nn.Linear(512, 256)
         self.comp_layer_4 = nn.Linear(256, 128)
-        self.dropout = nn.Dropout(0.2)
         self.out_prob = nn.Linear(128, 2)
         self.out_score = nn.Linear(128, 2)
 
@@ -81,18 +80,18 @@ class SimDNN(nn.Module):
         self.comp_layer_1 = nn.Linear(512, 512)
         self.comp_layer_2 = nn.Linear(512, 256)
         self.comp_layer_3 = nn.Linear(256, 128)
-        self.comp_layer_5 = nn.Linear(128, 64)
+        self.comp_layer_4 = nn.Linear(128, 64)
 
         self.out_prob = nn.Linear(64, 2)
 
     def forward(self, home_vector, home_state, away_vector, away_state):
         home_vector = F.leaky_relu(
             self.input_home_vector(home_vector),
-            negative_slope=-1
+            negative_slope=0.2
         )
         away_vector = F.leaky_relu(
             self.input_away_vector(away_vector),
-            negative_slope=-1
+            negative_slope=0.2
         )
         home_state = F.relu(
             self.input_home_state(home_state)
@@ -103,22 +102,18 @@ class SimDNN(nn.Module):
 
         home_representation = F.leaky_relu(
             self.home_layer(torch.cat((home_vector, home_state), dim=1)),
-            negative_slope=-0.2
+            negative_slope=0.2
         )
 
         away_representation = F.leaky_relu(
             self.home_layer(torch.cat((away_vector, away_state), dim=1)),
-            negative_slope=-0.2
+            negative_slope=0.2
         )
 
         competition_round = F.leaky_relu(self.comp_layer_1(torch.cat([home_representation, away_representation], dim=1)))
         competition_round = F.leaky_relu(self.comp_layer_2(competition_round), negative_slope=-0.5)
-        #competition_round = self.dropout(competition_round)
         competition_round = F.relu(self.comp_layer_3(competition_round))
-        #competition_round = F.relu(self.comp_layer_4(competition_round))
-        #competition_round = self.dropout(competition_round)
-        competition_round = F.relu(self.comp_layer_5(competition_round))
-        #competition_round = self.dropout(competition_round)
+        competition_round = F.relu(self.comp_layer_4(competition_round))
 
         output_prob = F.softmax(
             self.out_prob(competition_round)
