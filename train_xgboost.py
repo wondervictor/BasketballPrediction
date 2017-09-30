@@ -23,7 +23,7 @@ def train(team_raw_data, opt):
 
         away_state = x[2:4]
         home_state = x[4:6]
-        input_vector = home_vector.tolist() + home_state + away_vector.tolist() + away_state
+        input_vector = (home_vector-away_vector).tolist() + home_state + away_state
 
         train_x.append(input_vector)
         train_y.append(x[-1])

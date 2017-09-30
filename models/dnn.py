@@ -58,9 +58,9 @@ class DNN(nn.Module):
 
         competition_round = F.relu(self.comp_layer_1(torch.cat([home_ready, away_ready], dim=1)))
         competition_round = F.relu(self.comp_layer_2(competition_round))
-        competition_round = self.dropout(competition_round)
+        # competition_round = self.dropout(competition_round)
         competition_round = F.relu(self.comp_layer_3(competition_round))
-        competition_round = self.dropout(competition_round)
+        # competition_round = self.dropout(competition_round)
         competition_round = F.relu(self.comp_layer_4(competition_round))
 
         output_prob = F.softmax(self.out_prob(competition_round))

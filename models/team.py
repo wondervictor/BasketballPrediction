@@ -125,11 +125,11 @@ def team_representations(team_raw_data, type, topk=-1):
 
     if type == "average":
 
-        return average(team_raw_data, topk)
+        return average(team_raw_data, 8)
 
     elif type == "reduce":
 
-        return reduce_(team_raw_data, topk)
+        return reduce_(team_raw_data, 8)
 
     else:
         print("Not Implemented!")
