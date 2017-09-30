@@ -99,7 +99,7 @@ def extract_essentials(member):
     :rtype: 
     """
     member = member_process(member)
-    new_member = [member[1], member[3], member[4], member[6], member[7]] + member[10:].tolist()
+    new_member = [3*member[1], member[3], member[4], member[6], member[7]] + member[10:18].tolist() + [member[18]]
 
     return np.array(new_member)
 
