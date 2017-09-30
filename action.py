@@ -4,12 +4,11 @@
 Main
 """
 import argparse
+import train_dnn
 import data_process as dp
 import models.team as team
 import train_svm as svm
-import train_xgboost as xgboost
 import numpy as np
-import train_dnn
 
 
 def get_team_representations(type):
@@ -59,14 +58,18 @@ def test_svm(opt):
 
 ### XGBoost
 def train_xgboost(opt):
+    import train_xgboost as xgboost
     team_data = get_team_representations(opt.team_data_type)
     xgboost.train(team_data, opt)
 
 def test_xgboost(opt):
+    import train_xgboost as xgboost
     team_data = get_team_representations(opt.team_data_type)
     xgboost.test(team_data)
 
 def predict_xgboost(opt):
+    import train_xgboost as xgboost
+
     team_data = get_team_representations(opt.team_data_type)
     xgboost.predict(team_data)
 
