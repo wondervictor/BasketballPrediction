@@ -37,6 +37,7 @@ class DNN(nn.Module):
         :return: 
         :rtype: 
         """
+        print(home_vector.shape, home_state.shape)
         home_representation = F.leaky_relu(
             self.input_team_home_layer(torch.cat([home_vector, home_state], dim=1)),
             negative_slope=-0.1
