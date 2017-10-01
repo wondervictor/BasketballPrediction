@@ -1,7 +1,6 @@
 import torch
-from action import train_with_dnn, train_svm, train_xgboost
+from action import train_with_dnn, train_svm, train_xgboost, train_bayes
 import argparse
-
 
 
 if __name__ == "__main__":
@@ -29,3 +28,5 @@ if __name__ == "__main__":
         train_svm(args)
     elif args.model == "xgboost":
         train_xgboost(args)
+    elif args.model == "bayes":
+        train_bayes(args)

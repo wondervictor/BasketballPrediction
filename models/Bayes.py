@@ -21,8 +21,8 @@ class Bayes(object):
 
     def save_model(self):
         with open('model_params/bayes.pkl', 'wb') as f:
-            pickle.dump(self.model,f)
+            pickle.dump(self.model, f)
 
     def load_model(self):
-        with open('model_params/bayes.pkl', 'wb') as f:
+        with open('model_params/bayes.pkl', 'rb') as f:
             self.model = pickle.load(f)

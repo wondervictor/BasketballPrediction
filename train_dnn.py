@@ -8,7 +8,7 @@ import torch
 import torch.nn as nn
 from torch.autograd import Variable
 import torch.nn.functional as F
-from data_process import MatchData, tmp_load
+from data_process import MatchData, load_predict_data
 from data_process import test_data_func, train_data_func
 from models.dnn import DNN, SimDNN
 import os
@@ -72,12 +72,11 @@ def train_dnn_batch(epoches, team_data, opt):
     """
 
     batch_size = opt.batch_size
-    LEARNING_RATE = 0.0001
+    LEARNING_RATE = 0.0005
     dnn = SimDNN(TEAM_VECTOR_SIZE)
     if opt.cuda == 1:
         dnn.cuda()
-    #data_provider = MatchData(1000)
-    dnn_optimizer = optimizer.RMSprop(dnn.parameters(), lr=LEARNING_RATE)
+    dnn_optimizer = optimizer.Adamax(dnn.parameters(), lr=LEARNING_RATE)
     prob_criterion = torch.nn.CrossEntropyLoss()
     score_criterion = torch.nn.MSELoss()
     train_data = train_data_func()
@@ -87,11 +86,11 @@ def train_dnn_batch(epoches, team_data, opt):
     print("Starting to train with DNN")
     for epoch in range(epoches):
         random.shuffle(train_data)
-        if epoch == 35:
+        if epoch == 15:
             LEARNING_RATE = LEARNING_RATE / 5.0
             for param_group in dnn_optimizer.param_groups:
                 param_group['lr'] = LEARNING_RATE
-        if epoch == 100:
+        if epoch == 25:
             LEARNING_RATE = LEARNING_RATE / 10.0
             for param_group in dnn_optimizer.param_groups:
                 param_group['lr'] = LEARNING_RATE
@@ -139,7 +138,6 @@ def train_dnn_batch(epoches, team_data, opt):
                 away_state=batch_away_current_state
             )
             loss = prob_criterion(output_prob, batch_result)
-            #loss += 0.001*score_criterion(output_score, batch_score)
 
             dnn_optimizer.zero_grad()
             loss.backward()
@@ -148,6 +146,7 @@ def train_dnn_batch(epoches, team_data, opt):
             if i % 100 == 0:
                 print("Epoches: %s Sample: %s Loss: %s" % (epoch, i + 1, loss.data[0]))
 
+        # Test after training
         if opt.dataset == "train":
             save_model(dnn, 'train_dnn_%d.pkl' % epoch)
             opt.model_name = 'train_dnn_%d.pkl' % epoch
@@ -160,7 +159,7 @@ def train_dnn_batch(epoches, team_data, opt):
 
 def train_dnn(epoches, team_data, opt):
     """
-    train dnn here
+    train dnn without Mini Batch here
     :return: 
     :rtype: 
     """
@@ -168,7 +167,6 @@ def train_dnn(epoches, team_data, opt):
     dnn = SimDNN(TEAM_VECTOR_SIZE)
     if opt.cuda == 1:
         dnn.cuda()
-    #data_provider = MatchData(1000)
     dnn_optimizer = optimizer.RMSprop(dnn.parameters(), lr=LEARNING_RATE)
     prob_criterion = torch.nn.CrossEntropyLoss()
     score_criterion = torch.nn.MSELoss()
@@ -189,7 +187,6 @@ def train_dnn(epoches, team_data, opt):
             for param_group in dnn_optimizer.param_groups:
                 param_group['lr'] = LEARNING_RATE
         for i in range(len(train_data)):
-            #     Competition: [(Away, Home, Away_Ago_Win, Away_Ago_Lose, Home_Ago_Win, Home_Ago_Lose, Away_Score, Home_Score, Home_Win)]
             away_id = train_data[i][0]
             home_id = train_data[i][1]
 
@@ -231,13 +228,7 @@ def train_dnn(epoches, team_data, opt):
             )
 
             loss = prob_criterion(output_prob, prob)
-            #loss += 0.001*score_criterion(output_score, score)
 
-            # a, b = output_prob.data.cpu().numpy()[0][0], output_prob.cpu().data.numpy()[0][1]
-            # if float(a)/float(b) > 9 or float(a)/float(b)< (1.0/9.0):
-            #     for param_group in dnn_optimizer.param_groups:
-            #         param_group['lr'] = LEARNING_RATE*10
-                
             dnn_optimizer.zero_grad()
             loss.backward()
             dnn_optimizer.step()
@@ -256,13 +247,8 @@ def train_dnn(epoches, team_data, opt):
 
 
 def test(team_data, opt):
-    data_provider = MatchData(1000)
-    data_provider.roll_data()
 
-    #testing_data = data_provider.get_test_data()
     testing_data = test_data_func()
-
-    log_file = open('testing.log', 'w+')
 
     correct = 0
     wrong = 0
@@ -294,26 +280,19 @@ def test(team_data, opt):
         y_label.append(result)
         y_pred.append(prob.data.cpu().numpy()[1])
 
-
         if pred_win == result:
             correct += 1
-            #line = 'Test: %s Correct! Confidence=%s' % (i, prob.data[pred_win])
         else:
             wrong += 1
-            #line = 'Test: %s Wrong! Confidence=%s' % (i, prob.data.cpu().numpy().tolist())
-
-        # print(line)
-        # log_file.write(line+'\n')
     auc_score = auc(y_label, y_pred)
     print("TEST: auc score: %s" % auc_score)
-    # log_file.close()
 
     print("Wrong: %s Correct: %s" % (wrong, correct))
 
 
 def predict_result(team_data, opt):
 
-    testing_data = tmp_load()
+    testing_data = load_predict_data()
     output_file = open('output/predictPro.csv', 'w+')
     output_file.write('主场赢得比赛的置信度\n')
 

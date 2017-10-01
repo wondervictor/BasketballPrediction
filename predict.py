@@ -1,4 +1,4 @@
-from action import predict_svm, predict_dnn, predict_xgboost
+from action import predict_svm, predict_dnn, predict_xgboost, predict_bayes
 import argparse
 
 if __name__ == "__main__":
@@ -25,6 +25,6 @@ if __name__ == "__main__":
     elif args.model == "svm":
         predict_svm(args)
     elif args.model == "xgboost":
-        predict_xgboost(args)
+        predict_bayes(args)
 
     
