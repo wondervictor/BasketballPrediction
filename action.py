@@ -8,6 +8,7 @@ import train_dnn
 import data_process as dp
 import models.team as team
 import train_svm as svm
+import train_bayes as bayes
 import numpy as np
 
 
@@ -56,16 +57,35 @@ def test_svm(opt):
     team_data = get_team_representations(opt.team_data_type)
     svm.test(team_data)
 
+
+### Bayes Model
+def train_bayes(opt):
+    team_data = get_team_representations(opt.team_data_type)
+    bayes.train(team_data, opt)
+
+
+def predict_bayes(opt):
+    team_data = get_team_representations(opt.team_data_type)
+    bayes.train(team_data, opt)
+
+
+def test_bayes(opt):
+    team_data = get_team_representations(opt.team_data_type)
+    bayes.test(team_data, opt)
+
+
 ### XGBoost
 def train_xgboost(opt):
     import train_xgboost as xgboost
     team_data = get_team_representations(opt.team_data_type)
     xgboost.train(team_data, opt)
 
+
 def test_xgboost(opt):
     import train_xgboost as xgboost
     team_data = get_team_representations(opt.team_data_type)
     xgboost.test(team_data)
+
 
 def predict_xgboost(opt):
     import train_xgboost as xgboost

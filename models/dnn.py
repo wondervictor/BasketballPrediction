@@ -110,8 +110,11 @@ class SimDNN(nn.Module):
             negative_slope=0.2
         )
 
-        competition_round = F.leaky_relu(self.comp_layer_1(torch.cat([home_representation, away_representation], dim=1)))
-        competition_round = F.leaky_relu(self.comp_layer_2(competition_round), negative_slope=-0.5)
+        competition_round = F.leaky_relu(
+            self.comp_layer_1(torch.cat([home_representation, away_representation], dim=1)),
+            negative_slope=0.5
+        )
+        competition_round = F.leaky_relu(self.comp_layer_2(competition_round), negative_slope=0.5)
         competition_round = F.relu(self.comp_layer_3(competition_round))
         competition_round = F.relu(self.comp_layer_4(competition_round))
 
