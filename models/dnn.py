@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -6,6 +7,7 @@ CURRENT_COMP_VECTOR_SIZE = 2
 TEAM_VECTOR_SIZE = 14
 
 
+# Original Version of DNN
 class DNN(nn.Module):
     
     def __init__(self):
@@ -23,17 +25,17 @@ class DNN(nn.Module):
 
     def forward(self, home_vector, away_vector, home_state, away_state):
         """
-        
-        :param home_vector: 
-        :type home_vector: 
-        :param away_vector: 
-        :type away_vector: 
-        :param home_state: 
-        :type home_state: 
-        :param away_state: 
-        :type away_state: 
-        :return: 
-        :rtype: 
+        Forward !
+        :param home_vector: Home Team Representation Vector
+        :type home_vector:  Tensor [1xTEAM_VECTOR_SIZE]
+        :param away_vector: Aray Team Representation Vector
+        :type away_vector: Tensor [1xTEAM_VECTOR_SIZE]
+        :param home_state: Home Team Current State (主场战绩)
+        :type home_state: Tensor [1xCURRENT_COMP_VECTOR_SIZE]
+        :param away_state: Away Team Current State (客场战绩)
+        :type away_state: Tensor [1xCURRENT_COMP_VECTOR_SIZE]
+        :return: Porbability
+        :rtype: [1x2] Tensor
         """
 
         home_representation = F.leaky_relu(
@@ -56,9 +58,7 @@ class DNN(nn.Module):
 
         competition_round = F.relu(self.comp_layer_1(torch.cat([home_ready, away_ready], dim=1)))
         competition_round = F.relu(self.comp_layer_2(competition_round))
-        # competition_round = self.dropout(competition_round)
         competition_round = F.relu(self.comp_layer_3(competition_round))
-        # competition_round = self.dropout(competition_round)
         competition_round = F.relu(self.comp_layer_4(competition_round))
 
         output_prob = F.softmax(self.out_prob(competition_round))
@@ -67,6 +67,7 @@ class DNN(nn.Module):
         return output_prob
 
 
+# Improved Version of DNN
 class SimDNN(nn.Module):
 
     def __init__(self, input_size):
@@ -85,6 +86,19 @@ class SimDNN(nn.Module):
         self.out_prob = nn.Linear(64, 2)
 
     def forward(self, home_vector, home_state, away_vector, away_state):
+        """
+        Forward !
+        :param home_vector: Home Team Representation Vector
+        :type home_vector:  Tensor [1xTEAM_VECTOR_SIZE]
+        :param away_vector: Aray Team Representation Vector
+        :type away_vector: Tensor [1xTEAM_VECTOR_SIZE]
+        :param home_state: Home Team Current State (主场战绩)
+        :type home_state: Tensor [1xCURRENT_COMP_VECTOR_SIZE]
+        :param away_state: Away Team Current State (客场战绩)
+        :type away_state: Tensor [1xCURRENT_COMP_VECTOR_SIZE]
+        :return: Porbability
+        :rtype: [1x2] Tensor
+        """
         home_vector = F.leaky_relu(
             self.input_home_vector(home_vector),
             negative_slope=0.2
@@ -110,8 +124,11 @@ class SimDNN(nn.Module):
             negative_slope=0.2
         )
 
-        competition_round = F.leaky_relu(self.comp_layer_1(torch.cat([home_representation, away_representation], dim=1)))
-        competition_round = F.leaky_relu(self.comp_layer_2(competition_round), negative_slope=-0.5)
+        competition_round = F.leaky_relu(
+            self.comp_layer_1(torch.cat([home_representation, away_representation], dim=1)),
+            negative_slope=0.5
+        )
+        competition_round = F.leaky_relu(self.comp_layer_2(competition_round), negative_slope=0.5)
         competition_round = F.relu(self.comp_layer_3(competition_round))
         competition_round = F.relu(self.comp_layer_4(competition_round))
 
@@ -119,10 +136,3 @@ class SimDNN(nn.Module):
             self.out_prob(competition_round)
         )
         return output_prob
-
-
-class AllInputModel(nn.Module):
-    def __init__():
-        pass
-    def forward(self, home_team_vector, away_team_vector, home_current_comp_vector, away_current_comp_vector):
-        pass

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from data_process import test_data_func, train_data_func, tmp_load
+from data_process import test_data_func, train_data_func, load_predict_data
 import numpy as np
 import models.boost as boost
 from evaluate import auc, acc
@@ -63,7 +63,7 @@ def test(team_raw_data):
 
 def predict(team_raw_data):
 
-    testing_data = tmp_load()
+    testing_data = load_predict_data()
     output_file = open('output/predictPro.csv', 'w+')
     output_file.write('主场赢得比赛的置信度\n')
 

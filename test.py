@@ -1,4 +1,4 @@
-from action import test_with_dnn, test_svm, test_xgboost
+from action import test_with_dnn, test_svm, test_xgboost, test_bayes
 import argparse
 
 if __name__ == "__main__":
@@ -22,3 +22,5 @@ if __name__ == "__main__":
         test_svm(args)
     elif args.model == "xgboost":
         test_xgboost(args)
+    elif args.model == "bayes":
+        test_bayes(args)

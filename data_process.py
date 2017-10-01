@@ -3,8 +3,6 @@
 import random
 import numpy as np
 
-__all__ = ['MatchData']
-
 
 def train_data_func():
     with open('data/train.csv', 'r') as openfile:
@@ -97,7 +95,7 @@ def load_competitions():
     return data
 
 
-def tmp_load():
+def load_predict_data():
     i = 0
 
     data = []
@@ -125,12 +123,6 @@ def tmp_load():
         parts = parts + away_ago + home_ago
         data.append(parts)
     return data
-
-
-def tmp_write():
-    s = MatchData(1000)
-    s.roll_data()
-    s.dump_matches_to_file('data/')
 
 
 class TeamData(object):
@@ -204,24 +196,13 @@ class MatchData(object):
                 f.write(line)
 
 
-def test_load_competitions():
-
-    data = load_competitions()
-    print(data[1:10])
-
-
-def test_match_data():
-
-    s = MatchData(1000)
-    s.roll_data()
-    s.dump_matches_to_file('data/')
-
-
-def test_team_data():
-
-    s = TeamData()
-    s.process()
-
+def generate_train_files():
+    """
+    Generate Training set and Testing set
+    """
+    match = MatchData(1000)
+    match.roll_data()
+    match.dump_matches_to_file('./data/')
 
 
 
