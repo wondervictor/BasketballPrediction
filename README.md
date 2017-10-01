@@ -1,9 +1,33 @@
 # Basketball Prediction
 
-### Interface
-todo
+## Introduction
 
-### Changelog
-[2017-09-23] Add **Competition DNN Network** and support **Data Preprocess**
+> Predict the probability of the basketball matches with Deep Neural Networks
+> 2017 Seedcup Preliminary Contest
 
-[2017-09-25] Calculate the average level of each team and train with DNN
+#### Team Representation Network
+
+![](./images/team.png)
+
+#### Competition Network
+
+![](./images/comp.png)
+
+## Environment
+
+* Pytorch
+* XGBoost
+* Scikit-Learn
+
+## Contributors
+
+* [VicChan](https://github.com/wondervictor)
+
+* [Yifan Jiang](https://github.com/yueruchen)
+
+* [Xiangru Tang](https://github.com/tangxiangru)
+
+## Licence
+
+**This Project is Under the MIT Licence**
+
