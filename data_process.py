@@ -206,7 +206,8 @@ def generate_train_files():
 
 
 
-
+if __name__ == '__main__':
+    generate_train_files()
 
 
 

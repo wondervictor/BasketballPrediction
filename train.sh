@@ -1,1 +1,9 @@
-python main.py --train 1 --test 0 --batch-size 1 --epoch 10 --team_data_type 'rank_8'
+#!/usr/bin/env bash
+
+# generate training set and testing set
+
+python data_progresss.py
+
+# train
+
+python train.py --model dnn --epoch 60 --team_data_type reduce --cuda 1 --batch-size 16

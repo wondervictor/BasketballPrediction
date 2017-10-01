@@ -1,1 +1,5 @@
-python main.py --test 1 --train 0 --cuda 1 --team_data_type 'rank_8' --model_name 'epoch_9_params.pkl'
+#!/usr/bin/env bash
+
+# train
+
+python test.py --model dnn  --team_data_type reduce --cuda 1
