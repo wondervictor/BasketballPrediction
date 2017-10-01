@@ -205,7 +205,6 @@ def generate_train_files():
     match.dump_matches_to_file('./data/')
 
 
-
 if __name__ == '__main__':
     generate_train_files()
 

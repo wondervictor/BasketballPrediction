@@ -6,10 +6,12 @@ Evalute the model
 from sklearn import metrics
 
 
+# Calculate AUC
 def auc(y, pred_y):
     return metrics.roc_auc_score(y, pred_y)
 
 
+# Calculate ACC
 def acc(y, pred_y):
     correct = 0
     wrong = 0
@@ -21,7 +23,3 @@ def acc(y, pred_y):
             wrong += 1
 
     print("True: %s ACC: %s" % (correct, float(correct)/float(correct+wrong)))
-
-
-
-    

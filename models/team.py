@@ -32,11 +32,11 @@ def member_process(member):
 def get_top_k(k, team):
     """
     Return the Top-K team members of a Team
-    :param k: 
-    :type k: 
-    :param team: 
+    :param k: Numbers 
+    :type k: int
+    :param team: Team Tensor 
     :type team: 
-    :return: 
+    :return: the top k members
     :rtype: 
     """
 
@@ -52,6 +52,9 @@ def get_top_k(k, team):
 
 
 def average(team_raw_data, topk=-1):
+    """
+    Return the average vector of all memebers
+    """
 
     team_data = dict()
 
@@ -79,7 +82,11 @@ def extract_essentials(member):
 
 
 def reduce_(team_raw_data, topk=-1):
-
+    """
+    Reduce the features to 14 dimension
+    :param team_raw_data: raw team data 
+    :type team_raw_data: [1x21] Numpy Array
+    """
     team_data = dict()
 
     for key in team_raw_data.keys():
@@ -93,43 +100,12 @@ def reduce_(team_raw_data, topk=-1):
     return team_data
 
 
-def simple(team_raw_data, topk=-1):
-
-    """
-    0上场时间,1投篮命中率,2投篮命中次数,3投篮出手次数,4三分命中率,5三分命中次数,6三分出手次数,
-    7罚球命中率,8罚球命中次数,9罚球出手次数,10篮板总数,11前场篮板,12后场篮板,13助攻,14抢断,15盖帽,16失误,17犯规,18得分 
-    :param team_raw_data: 
-    :type team_raw_data: 
-    :param topk: 
-    :type topk: 
-    :return: 
-    :rtype: 
-    """
-
-    team_data = dict()
-    for key in team_raw_data.keys():
-        team = team_raw_data[key]
-        if topk != -1:
-            team = get_top_k(topk, team)
-        new_team = []
-        for i in range(len(team)):
-            new_team.append(extract_essentials(team[i]))
-        team = new_team
-        team_vector = []
-        for i in range(0, len(team)):
-            team_vector.extend(team[i])
-        team_data[key] = team_vector
-    return team_data
-
-
 def team_representations(team_raw_data, type, topk=-1):
 
     if type == "average":
         return average(team_raw_data, 8)
     elif type == "reduce":
         return reduce_(team_raw_data, 8)
-    elif type == "simple":
-        return simple(team_raw_data, 5)
     else:
         print("Not Implemented!")
         exit(-1)

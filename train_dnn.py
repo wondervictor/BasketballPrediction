@@ -37,6 +37,7 @@ def predict(model_name, home_vector, away_vector, home_state, away_state, opt):
 
     net = load_model(model_name)
     if opt.cuda == 1:
+        # Use GPU
         home_current_state = Variable(torch.FloatTensor(home_state).cuda())
         away_current_state = Variable(torch.FloatTensor(away_state).cuda())
 
@@ -124,6 +125,7 @@ def train_dnn_batch(epoches, team_data, opt):
             batch_result = Variable(torch.LongTensor(batch_result))
 
             if opt.cuda == 1:
+                # Use GPU
                 batch_home_current_state = batch_home_current_state.cuda()
                 batch_away_current_state = batch_home_current_state.cuda()
                 batch_home_vector = batch_home_vector.cuda()

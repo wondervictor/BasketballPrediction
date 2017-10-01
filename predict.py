@@ -26,5 +26,3 @@ if __name__ == "__main__":
         predict_svm(args)
     elif args.model == "xgboost":
         predict_bayes(args)
-
-    

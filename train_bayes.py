@@ -50,7 +50,6 @@ def test(team_raw_data, opt):
         away_vector = team_raw_data[away]
         away_state = np.array(x[2:4])
         home_state = np.array(x[4:6])
-
         input_vector = home_vector.tolist() + away_vector.tolist() + home_state.tolist() + away_state.tolist()
         input_vector = np.array(input_vector)
 
