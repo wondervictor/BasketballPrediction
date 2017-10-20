@@ -19,14 +19,6 @@
 * XGBoost
 * Scikit-Learn
 
-## Contributors
-
-* [VicChan](https://github.com/wondervictor)
-
-* [Yifan Jiang](https://github.com/yueruchen)
-
-* [Xiangru Tang](https://github.com/tangxiangru)
-
 ## Licence
 
 **This Project is Under the MIT Licence**
